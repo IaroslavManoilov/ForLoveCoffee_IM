@@ -1,0 +1,2601 @@
+кодул какре требуе де арэтат нумай декыт каре ера ла главная
+
+<template>
+    <main ref="rootEl" class="landing" @mousemove="onMove" @mouseleave="onLeave">
+        <!-- FULLSCREEN background -->
+        <div class="bgLayer" :style="{ backgroundImage: `url(${bg})` }" aria-hidden="true"></div>
+        <div class="overlay" aria-hidden="true"></div>
+
+        <!-- hearts particles -->
+        <div class="particles" aria-hidden="true">
+            <span v-for="n in 18" :key="n" class="heart" :style="particleStyle(n)"></span>
+        </div>
+
+        <section class="stage">
+            <!-- LEFT -->
+            <div class="left" :style="leftStyle">
+                <div class="badge">
+                    <span class="badge__dot"></span>
+
+                    <span class="badge__title">
+                        ☕ For-L<span class="badge__love" aria-label="Love">
+                            <span class="badge__l">l</span>
+                            <span class="badge__infBox" aria-hidden="true">
+                                <img class="badge__inf" :src="infLogo" alt="" />
+                            </span>
+                            <span class="badge__ve">ve</span>
+                        </span>
+                        <span class="badge__coffee"> Coffee</span>
+                    </span>
+
+                    <span class="badge__spark" aria-hidden="true"></span>
+                </div>
+
+                <h1 class="headline">
+                    Вкус, который<br />
+                    согреет и подарит любовь
+                </h1>
+
+                <p class="lead">
+                    Закажи любимый кофе за пару кликов или забронируй столик — быстро, удобно и красиво.
+                </p>
+
+                <div class="cta">
+                    <button class="btn btn--primary" type="button" @click="goMenu" @mousemove="onBtnMove($event)"
+                        @mouseleave="onBtnLeave($event)">
+                        Посмотреть меню
+                    </button>
+
+                    <button class="btn btn--ghost" type="button" @click="goBooking" @mousemove="onBtnMove($event)"
+                        @mouseleave="onBtnLeave($event)">
+                        Забронировать столик
+                    </button>
+                </div>
+
+                <div class="mini">
+                    <div class="mini__item">
+                        <div class="mini__ico" aria-hidden="true">🔥</div>
+                        <div class="mini__txt">
+                            <div class="mini__t">Свежая обжарка</div>
+                            <div class="mini__s">каждый день</div>
+                        </div>
+                    </div>
+
+                    <div class="mini__item">
+                        <div class="mini__ico" aria-hidden="true">⚡</div>
+                        <div class="mini__txt">
+                            <div class="mini__t">Быстрая выдача</div>
+                            <div class="mini__s">без очередей</div>
+                        </div>
+                    </div>
+
+                    <div class="mini__item">
+                        <div class="mini__ico" aria-hidden="true">🛋️</div>
+                        <div class="mini__txt">
+                            <div class="mini__t">Уютная атмосфера</div>
+                            <div class="mini__s">тепло внутри</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scrollHint" aria-hidden="true">
+                    <span class="scrollHint__dot"></span>
+                    <span class="scrollHint__txt">скролл</span>
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <aside class="glass" aria-label="For-Love Coffee" :style="cardStyle">
+                <div class="glass__shine" aria-hidden="true"></div>
+                <div class="glass__border" aria-hidden="true"></div>
+
+                <div class="brand">
+                    <div class="brand__row" aria-label="For-Love">
+                        <span class="brand__txt">For-L</span>
+                        <span class="brand__infBox" aria-hidden="true">
+                            <img class="brand__inf" :src="infLogo" alt="" />
+                        </span>
+                        <span class="brand__txt">ve</span>
+                    </div>
+
+                    <div class="brand__sub">
+                        coffee<span class="brand__dots" aria-hidden="true">∞</span>
+                    </div>
+
+                    <!-- status: black text, dot only colored -->
+                    <div class="status">
+                        <span class="status__dot" :class="isOpen ? 'status__dot--open' : 'status__dot--closed'"
+                            aria-hidden="true"></span>
+
+                        <span class="status__text">{{ statusText }}</span>
+                        <span class="status__time">09:00–22:00</span>
+                    </div>
+                </div>
+
+                <div class="glass__text">
+                    Открой меню — выбери напиток — оформи заказ.<br />
+                    Всё просто и красиво ✨
+                </div>
+
+                <div class="glass__actions">
+                    <button class="btn btn--primary btn--wide" type="button" @click="goMenu"
+                        @mousemove="onBtnMove($event)" @mouseleave="onBtnLeave($event)">
+                        Начать заказ
+                    </button>
+
+                    <button class="btn btn--soft btn--wide" type="button" @click="goBooking"
+                        @mousemove="onBtnMove($event)" @mouseleave="onBtnLeave($event)">
+                        Бронь столика
+                    </button>
+                </div>
+
+                <div class="glass__stats">
+                    <div class="stat">
+                        <div class="stat__num">10 мин</div>
+                        <div class="stat__label">среднее ожидание</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat__num">★ 4.9</div>
+                        <div class="stat__label">оценка гостей</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat__num">100%</div>
+                        <div class="stat__label">любовь в стакане</div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+</template>
+
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import infLogo from "@/assets/logo.svg";
+import bg from "@/assets/im2.png";
+
+const router = useRouter();
+const goMenu = () => router.push("/menu");
+const goBooking = () => router.push("/booking");
+
+const rootEl = ref(null);
+
+const reduceMotion = ref(false);
+const mq = typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+const setReduceMotion = () => (reduceMotion.value = Boolean(mq?.matches));
+
+const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+/* parallax + tilt */
+const mx = ref(0);
+const my = ref(0);
+const tx = ref(0);
+const ty = ref(0);
+let raf = 0;
+
+const tick = () => {
+    tx.value += (mx.value - tx.value) * 0.08;
+    ty.value += (my.value - ty.value) * 0.08;
+    raf = requestAnimationFrame(tick);
+};
+
+onMounted(() => {
+    setReduceMotion();
+    mq?.addEventListener?.("change", setReduceMotion);
+    raf = requestAnimationFrame(tick);
+});
+
+onBeforeUnmount(() => {
+    cancelAnimationFrame(raf);
+    mq?.removeEventListener?.("change", setReduceMotion);
+});
+
+const onMove = (e) => {
+    if (reduceMotion.value) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.value = clamp(((e.clientX - r.left) / r.width - 0.5) * 2, -1, 1);
+    my.value = clamp(((e.clientY - r.top) / r.height - 0.5) * 2, -1, 1);
+};
+const onLeave = () => {
+    mx.value = 0;
+    my.value = 0;
+};
+
+const leftStyle = computed(() => {
+    if (reduceMotion.value) return {};
+    return { transform: `translate3d(${tx.value * 6}px, ${ty.value * 4}px, 0)` };
+});
+const cardStyle = computed(() => {
+    if (reduceMotion.value) return {};
+    const rx = ty.value * -4;
+    const ry = tx.value * 6;
+    const dx = tx.value * -10;
+    const dy = ty.value * -8;
+    return { transform: `translate3d(${dx}px, ${dy}px, 0) rotateX(${rx}deg) rotateY(${ry}deg)` };
+});
+
+/* button magnet */
+const onBtnMove = (e) => {
+    if (reduceMotion.value) return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    el.style.setProperty("--bx", `${clamp(nx, -1, 1) * 4}px`);
+    el.style.setProperty("--by", `${clamp(ny, -1, 1) * 3}px`);
+};
+const onBtnLeave = (e) => {
+    const el = e.currentTarget;
+    el.style.setProperty("--bx", `0px`);
+    el.style.setProperty("--by", `0px`);
+};
+
+/* Open/Closed logic (09:00-22:00) */
+const OPEN_H = 9;
+const CLOSE_H = 22;
+
+const now = ref(new Date());
+let timer = 0;
+
+const isOpen = computed(() => {
+    const h = now.value.getHours();
+    const m = now.value.getMinutes();
+    const minutes = h * 60 + m;
+    return minutes >= OPEN_H * 60 && minutes < CLOSE_H * 60;
+});
+const statusText = computed(() => (isOpen.value ? "Открыто сейчас" : "Сейчас мы закрыты"));
+
+onMounted(() => {
+    timer = window.setInterval(() => (now.value = new Date()), 30_000);
+});
+onBeforeUnmount(() => {
+    if (timer) window.clearInterval(timer);
+});
+
+/* Hearts particles */
+const particleStyle = (n) => {
+    const seed = (n * 9301 + 49297) % 233280;
+    const rnd = seed / 233280;
+
+    const x = Math.round(rnd * 92 + 4);
+    const y = Math.round(((rnd * 7) % 1) * 84 + 6);
+    const s = (rnd * 0.75 + 0.35).toFixed(2);
+    const d = Math.round(rnd * 2200 + 200);
+    const a = (rnd * 0.28 + 0.10).toFixed(2);
+
+    return { left: `${x}%`, top: `${y}%`, opacity: a, transform: `scale(${s})`, animationDelay: `${d}ms` };
+};
+</script>
+
+<style>
+/* ========= FULL BLEED + поднять контент ========= */
+.landing {
+    --header-h: 72px;
+    /* <-- высота шапки: уменьшай/увеличивай */
+    --lift: -222px;
+    /* <-- насколько поднять весь контент вверх (например -28px) */
+
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+
+    padding-top: var(--header-h);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* фон на весь экран */
+.bgLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: #000;
+    transform: translateZ(0);
+}
+
+/* overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background:
+        radial-gradient(1100px 700px at 22% 35%, rgba(0, 0, 0, 0.42), transparent 62%),
+        radial-gradient(1000px 700px at 76% 55%, rgba(0, 0, 0, 0.32), transparent 68%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.44) 100%);
+}
+
+/* hearts */
+.particles {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.heart {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    animation: floatHeart 5200ms ease-in-out infinite;
+    filter: drop-shadow(0 6px 14px rgba(178, 74, 74, 0.20));
+}
+
+.heart::before,
+.heart::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 9px;
+    left: 5px;
+    top: 0px;
+    background: rgba(178, 74, 74, 0.95);
+    border-radius: 6px 6px 0 0;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+}
+
+.heart::after {
+    left: 1px;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+@keyframes floatHeart {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate3d(0, -22px, 0) scale(1.04);
+    }
+
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+/* content */
+.stage {
+    position: relative;
+    z-index: 3;
+
+    min-height: calc(100vh - var(--header-h));
+    padding: clamp(14px, 3vw, 56px);
+
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(14px, 3vw, 48px);
+    align-items: center;
+
+    perspective: 900px;
+
+    /* ✅ поднимаем весь блок вверх */
+    transform: translateY(var(--lift));
+}
+
+/* LEFT */
+.left {
+    max-width: 720px;
+    color: rgba(255, 255, 255, 0.92);
+    animation: floatIn 520ms ease both;
+    will-change: transform;
+}
+
+/* badge */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    font-weight: 850;
+    letter-spacing: 0.02em;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+.badge__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(178, 74, 74, 0.98);
+    box-shadow: 0 0 0 4px rgba(178, 74, 74, 0.22);
+}
+
+.badge__title {
+    display: inline-flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.badge__love {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.badge__infBox {
+    width: 14px;
+    height: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(0.20em);
+}
+
+.badge__inf {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.22));
+}
+
+.badge__coffee {
+    margin-left: 2px;
+}
+
+.badge__spark {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.14) 35%, transparent 70%);
+    transform: translateX(-70%);
+    animation: shimmer 2600ms ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-70%);
+        opacity: 0.16;
+    }
+
+    35% {
+        opacity: 0.42;
+    }
+
+    100% {
+        transform: translateX(70%);
+        opacity: 0.12;
+    }
+}
+
+.headline {
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    font-size: clamp(34px, 5.2vw, 66px);
+    text-shadow: 0 20px 60px rgba(0, 0, 0, 0.46);
+}
+
+.lead {
+    margin: 16px 0 0;
+    max-width: 580px;
+    font-size: clamp(14px, 1.6vw, 18px);
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.84);
+}
+
+.cta {
+    margin-top: 18px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.mini {
+    margin-top: 18px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    opacity: 0.95;
+}
+
+.mini__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(10px);
+    font-weight: 850;
+    font-size: 13px;
+    transition: transform 160ms ease, background 160ms ease;
+}
+
+.mini__item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.mini__ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(178, 74, 74, 0.20);
+    border: 1px solid rgba(178, 74, 74, 0.26);
+}
+
+.mini__t {
+    font-weight: 950;
+}
+
+.mini__s {
+    font-weight: 800;
+    opacity: 0.78;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.scrollHint {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.scrollHint__dot {
+    width: 20px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.scrollHint__dot::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateX(-50%);
+    animation: scrollDot 1200ms ease-in-out infinite;
+}
+
+@keyframes scrollDot {
+    0% {
+        transform: translate(-50%, 0);
+        opacity: 0.9;
+    }
+
+    70% {
+        transform: translate(-50%, 14px);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 0.9;
+    }
+}
+
+.scrollHint__txt {
+    font-weight: 850;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* RIGHT */
+.glass {
+    position: relative;
+    border-radius: 34px;
+    padding: clamp(20px, 3vw, 34px);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    animation: floatIn2 620ms ease both;
+    will-change: transform;
+    transform-style: preserve-3d;
+}
+
+.glass__shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 34px;
+    pointer-events: none;
+    background: radial-gradient(680px 260px at 16% 10%, rgba(255, 255, 255, 0.20), transparent 60%);
+}
+
+.glass__border {
+    position: absolute;
+    inset: 0;
+    border-radius: 34px;
+    pointer-events: none;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.22), transparent 30%, rgba(255, 255, 255, 0.16));
+    mask: linear-gradient(#000, transparent 70%);
+    opacity: 0.55;
+}
+
+.brand__row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    font-weight: 950;
+    font-style: italic;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-size: clamp(42px, 5vw, 86px);
+    color: rgba(15, 15, 15, 0.92);
+}
+
+.brand__infBox {
+    width: clamp(46px, 6vw, 112px);
+    height: clamp(34px, 4.2vw, 86px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(0.25em);
+}
+
+.brand__inf {
+    width: 100%;
+    height: auto;
+    display: block;
+    transform: translateY(6%);
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.20));
+}
+
+.brand__sub {
+    margin-top: 8px;
+    font-weight: 950;
+    font-style: italic;
+    font-size: clamp(22px, 2.8vw, 46px);
+    color: rgba(15, 15, 15, 0.78);
+}
+
+.brand__dots {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: 950;
+    color: rgba(178, 74, 74, 1);
+    transform: translateY(0.06em);
+}
+
+.status {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: rgba(15, 15, 15, 0.90);
+}
+
+.status__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+}
+
+.status__dot--open {
+    background: rgba(178, 74, 74, 0.98);
+    box-shadow: 0 0 0 4px rgba(178, 74, 74, 0.18);
+}
+
+.status__dot--closed {
+    background: rgba(20, 20, 20, 0.92);
+    box-shadow: 0 0 0 4px rgba(20, 20, 20, 0.12);
+}
+
+.status__time {
+    font-weight: 900;
+    opacity: 0.78;
+}
+
+.glass__text {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 850;
+    color: rgba(15, 15, 15, 0.70);
+}
+
+.glass__actions {
+    margin-top: 16px;
+    display: grid;
+    gap: 10px;
+}
+
+.glass__stats {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat {
+    border-radius: 16px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    backdrop-filter: blur(10px);
+    text-align: left;
+    transition: transform 160ms ease, background 160ms ease;
+}
+
+.stat:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.stat__num {
+    font-weight: 950;
+    color: rgba(15, 15, 15, 0.88);
+}
+
+.stat__label {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 850;
+    color: rgba(15, 15, 15, 0.62);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 13px 18px;
+    font-weight: 900;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    transform: translate3d(var(--bx, 0px), var(--by, 0px), 0);
+}
+
+.btn--wide {
+    width: 100%;
+}
+
+.btn--primary {
+    background: #b24a4a;
+    color: #fff;
+    box-shadow: 0 14px 34px rgba(178, 74, 74, 0.32);
+}
+
+.btn--primary:hover {
+    background: #9b3e3e;
+    box-shadow: 0 18px 46px rgba(178, 74, 74, 0.34);
+}
+
+.btn--ghost {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+}
+
+.btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.20);
+}
+
+.btn--soft {
+    background: rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: rgba(15, 15, 15, 0.86);
+}
+
+.btn--soft:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes floatIn2 {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scrollDot {
+    0% {
+        transform: translate(-50%, 0);
+        opacity: 0.9;
+    }
+
+    70% {
+        transform: translate(-50%, 14px);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 0.9;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .heart,
+    .badge__spark,
+    .scrollHint__dot::after {
+        animation: none !important;
+    }
+
+    .left,
+    .glass {
+        animation: none !important;
+    }
+}
+
+@media (max-width: 980px) {
+    .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        transform: translateY(calc(var(--lift) * 0.5));
+    }
+
+    .left {
+        max-width: 740px;
+    }
+
+    .cta {
+        justify-content: center;
+    }
+
+    .mini {
+        justify-content: center;
+    }
+
+    .glass {
+        width: min(92vw, 580px);
+        transform: none !important;
+    }
+
+    .glass__stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat {
+        text-align: center;
+    }
+}
+
+@media (max-width: 520px) {
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+
+..........................................................index.vue
+<script setup lang="ts">
+import Hero from '~/components/Hero.vue';
+
+</script>
+
+<template>
+  <Hero />
+</template>
+........................................................
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////
+Pentru 3d codul
+
+<template>
+    <main ref="rootEl" class="landing" @mousemove="onMove" @mouseleave="onLeave">
+        <!-- 3D canvas -->
+        <canvas ref="threeCanvas" class="three" aria-hidden="true"></canvas>
+
+        <!-- overlays -->
+        <div class="bg" aria-hidden="true"></div>
+        <div class="grain" aria-hidden="true"></div>
+
+        <!-- progress -->
+        <div class="progress" aria-hidden="true">
+            <span class="progress__bar" :style="{ transform: `scaleX(${scrollProgress})` }" />
+        </div>
+
+        <!-- topbar -->
+        <header class="topbar" :class="{ 'topbar--solid': scrollY > 24 }">
+            <div class="topbar__inner">
+                <button class="brand" type="button" @click="scrollTo('top')">
+                    <span class="brand__dot" aria-hidden="true"></span>
+                    <span class="brand__txt">For-L</span>
+                    <img class="brand__logo" :src="logoUrl" alt="" aria-hidden="true" />
+                    <span class="brand__txt">ve</span>
+                </button>
+
+                <nav class="nav">
+                    <button class="nav__item" type="button" @click="scrollTo('about')">О нас</button>
+                    <button class="nav__item" type="button" @click="scrollTo('menu')">Меню</button>
+                    <button class="nav__item" type="button" @click="scrollTo('reviews')">Отзывы</button>
+                    <button class="nav__item" type="button" @click="scrollTo('visit')">Контакты</button>
+                </nav>
+
+                <div class="topbar__right">
+                    <div class="chip" :class="isOpen ? 'chip--open' : 'chip--closed'">
+                        <span class="chip__dot" aria-hidden="true"></span>
+                        <span class="chip__txt">{{ statusText }}</span>
+                        <span class="chip__time">09:00–22:00</span>
+                    </div>
+
+                    <button class="btn btn--ghost btn--sm" type="button" @click="menuOpen = true" @mousemove="onBtnMove"
+                        @mouseleave="onBtnLeave">
+                        Меню сайта
+                    </button>
+
+                    <NuxtLink class="btn btn--primary btn--sm" to="/menu" @mousemove="onBtnMove"
+                        @mouseleave="onBtnLeave">
+                        Заказать
+                    </NuxtLink>
+                </div>
+            </div>
+        </header>
+
+        <!-- overlay menu -->
+        <div class="overlayMenu" :class="{ 'overlayMenu--open': menuOpen }" role="dialog" aria-modal="true">
+            <div class="overlayMenu__bg" @click="menuOpen = false"></div>
+            <div class="overlayMenu__panel">
+                <div class="overlayMenu__top">
+                    <div class="overlayMenu__title">Навигация</div>
+                    <button class="iconBtn" type="button" @click="menuOpen = false" aria-label="Close">✕</button>
+                </div>
+
+                <div class="overlayMenu__links">
+                    <button class="overlayLink" type="button" @click="goSection('top')">Главная</button>
+                    <button class="overlayLink" type="button" @click="goSection('about')">О нас</button>
+                    <button class="overlayLink" type="button" @click="goSection('menu')">Меню</button>
+                    <button class="overlayLink" type="button" @click="goSection('reviews')">Отзывы</button>
+                    <button class="overlayLink" type="button" @click="goSection('visit')">Контакты</button>
+                </div>
+
+                <div class="overlayMenu__cta">
+                    <NuxtLink class="btn btn--primary btn--wide" to="/menu">Открыть меню</NuxtLink>
+                    <NuxtLink class="btn btn--soft btn--wide" to="/booking">Бронь</NuxtLink>
+                </div>
+
+                <div class="overlayMenu__hint">
+                    Подсказка: добавь сюда соцсети/телефон из runtimeConfig — будет “дорого”.
+                </div>
+            </div>
+        </div>
+
+        <!-- intro -->
+        <section id="top" class="stage">
+            <div class="intro" :style="introStyle">
+                <div class="badge">
+                    <span class="badge__dot" aria-hidden="true"></span>
+                    <span class="badge__text">specialty coffee • быстрый заказ • бронь</span>
+                </div>
+
+                <h1 class="h1">
+                    Кофе, который выглядит<br />
+                    так же вкусно, как и ощущается
+                </h1>
+
+                <p class="p">
+                    Дорогой UX: минимум кликов, максимум эмоций. Смотри меню, собирай заказ, бронируй столик.
+                </p>
+
+                <div class="actions">
+                    <NuxtLink class="btn btn--primary" to="/menu" @mousemove="onBtnMove" @mouseleave="onBtnLeave">
+                        Собрать заказ</NuxtLink>
+                    <NuxtLink class="btn btn--ghost" to="/booking" @mousemove="onBtnMove" @mouseleave="onBtnLeave">
+                        Забронировать</NuxtLink>
+                </div>
+
+                <div class="featureRow">
+                    <div class="feature">
+                        <div class="feature__ico">⚡</div>
+                        <div>
+                            <div class="feature__t">быстро</div>
+                            <div class="feature__s">предзаказ + пикап</div>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature__ico">☕</div>
+                        <div>
+                            <div class="feature__t">вкусно</div>
+                            <div class="feature__s">стабильные рецепты</div>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature__ico">🛋️</div>
+                        <div>
+                            <div class="feature__t">уютно</div>
+                            <div class="feature__s">атмосфера и музыка</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="scrollHint" type="button" @click="scrollTo('about')" aria-label="Scroll">
+                    <span class="scrollHint__mouse" aria-hidden="true"></span>
+                    <span class="scrollHint__txt">скролл</span>
+                </button>
+            </div>
+
+            <aside class="card3d" :style="cardStyle" aria-label="Info card">
+                <div class="card3d__shine" aria-hidden="true"></div>
+                <div class="card3d__top">
+                    <div class="card3d__k">Сегодня</div>
+                    <div class="card3d__v">{{ isOpen ? "Открыто" : "Закрыто" }}</div>
+                </div>
+
+                <div class="card3d__big">
+                    <div class="card3d__brand">
+                        For-L<img class="card3d__logo" :src="logoUrl" alt="" aria-hidden="true" />ve
+                    </div>
+                    <div class="card3d__sub">coffee ∞ design</div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat__n">★ 4.9</div>
+                        <div class="stat__l">оценка</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat__n">10 мин</div>
+                        <div class="stat__l">ожидание</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat__n">100%</div>
+                        <div class="stat__l">любовь</div>
+                    </div>
+                </div>
+
+                <div class="card3d__btns">
+                    <NuxtLink class="btn btn--primary btn--wide" to="/menu" @mousemove="onBtnMove"
+                        @mouseleave="onBtnLeave">Начать</NuxtLink>
+                    <NuxtLink class="btn btn--soft btn--wide" to="/booking" @mousemove="onBtnMove"
+                        @mouseleave="onBtnLeave">Бронь</NuxtLink>
+                </div>
+            </aside>
+        </section>
+
+        <!-- sections -->
+        <section id="about" ref="aboutEl" class="section" :class="{ 'is-in': inView.about }">
+            <div class="wrap">
+                <div class="kicker">О нас</div>
+                <h2 class="h2">Сделано как продукт, а не как “страница”</h2>
+                <p class="p2">
+                    Упор на понятный путь пользователя: увидеть → выбрать → оформить. Без перегруза.
+                </p>
+
+                <div class="grid2">
+                    <div class="panel">
+                        <div class="panel__t">Качество</div>
+                        <div class="panel__p">Стабильный вкус, контроль рецептов, калибровки.</div>
+                        <div class="chips">
+                            <span class="pill">арабика</span><span class="pill">фильтр</span><span
+                                class="pill">эспрессо</span>
+                        </div>
+                    </div>
+
+                    <div class="panel panel--accent">
+                        <div class="panel__t">Сервис</div>
+                        <div class="panel__p">Заказ за минуты. Меньше кликов — больше удовольствия.</div>
+                        <div class="miniStats">
+                            <div class="miniStat">
+                                <div class="miniStat__n">≤ 2 мин</div>
+                                <div class="miniStat__l">оформление</div>
+                            </div>
+                            <div class="miniStat">
+                                <div class="miniStat__n">0%</div>
+                                <div class="miniStat__l">лишнего</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" ref="menuEl" class="section section--alt" :class="{ 'is-in': inView.menu }">
+            <div class="wrap">
+                <div class="kicker">Меню</div>
+                <h2 class="h2">Хиты недели</h2>
+
+                <div class="menuGrid">
+                    <article class="item">
+                        <div class="item__h"><span class="item__n">Latte Velvet</span><span class="price">65</span>
+                        </div>
+                        <div class="item__d">Сливочный, мягкий, карамельный шлейф.</div>
+                        <div class="tags"><span class="tag">milk</span><span class="tag">caramel</span></div>
+                    </article>
+                    <article class="item">
+                        <div class="item__h"><span class="item__n">Espresso Shot</span><span class="price">35</span>
+                        </div>
+                        <div class="item__d">Плотный, шоколад/орех, чистый финиш.</div>
+                        <div class="tags"><span class="tag">classic</span><span class="tag">strong</span></div>
+                    </article>
+                    <article class="item item--glow">
+                        <div class="item__h"><span class="item__n">Berry Filter</span><span class="price">55</span>
+                        </div>
+                        <div class="item__d">Ярко, сочно, чисто, ягодная кислотность.</div>
+                        <div class="tags"><span class="tag">filter</span><span class="tag">berry</span></div>
+                    </article>
+                    <article class="item">
+                        <div class="item__h"><span class="item__n">Cacao Cloud</span><span class="price">60</span></div>
+                        <div class="item__d">Какао, воздушная текстура, без приторности.</div>
+                        <div class="tags"><span class="tag">cacao</span><span class="tag">soft</span></div>
+                    </article>
+                </div>
+
+                <div class="sectionCta">
+                    <NuxtLink class="btn btn--primary" to="/menu" @mousemove="onBtnMove" @mouseleave="onBtnLeave">Полное
+                        меню</NuxtLink>
+                    <NuxtLink class="btn btn--ghost" to="/booking" @mousemove="onBtnMove" @mouseleave="onBtnLeave">Бронь
+                    </NuxtLink>
+                </div>
+            </div>
+        </section>
+
+        <section id="reviews" ref="reviewsEl" class="section" :class="{ 'is-in': inView.reviews }">
+            <div class="wrap">
+                <div class="kicker">Отзывы</div>
+                <h2 class="h2">Коротко и по делу</h2>
+
+                <div class="reviewGrid">
+                    <article class="review">
+                        <div class="review__top">
+                            <div class="ava">A</div>
+                            <div>
+                                <div class="review__name">Алина</div>
+                                <div class="review__meta">фильтр</div>
+                            </div>
+                            <div class="stars">★★★★★</div>
+                        </div>
+                        <div class="review__txt">Чистый вкус и реально быстро. Возвращаюсь.</div>
+                    </article>
+
+                    <article class="review">
+                        <div class="review__top">
+                            <div class="ava">M</div>
+                            <div>
+                                <div class="review__name">Михаил</div>
+                                <div class="review__meta">эспрессо</div>
+                            </div>
+                            <div class="stars">★★★★★</div>
+                        </div>
+                        <div class="review__txt">Стабильность — редкость. Здесь она есть.</div>
+                    </article>
+
+                    <article class="review review--accent">
+                        <div class="review__top">
+                            <div class="ava">K</div>
+                            <div>
+                                <div class="review__name">Катя</div>
+                                <div class="review__meta">латте</div>
+                            </div>
+                            <div class="stars">★★★★★</div>
+                        </div>
+                        <div class="review__txt">Латте как шёлк. И заказ — супер удобный.</div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="visit" ref="visitEl" class="section section--alt" :class="{ 'is-in': inView.visit }">
+            <div class="wrap">
+                <div class="kicker">Контакты</div>
+                <h2 class="h2">Забегай — у нас тепло</h2>
+
+                <div class="contactGrid">
+                    <div class="contact">
+                        <div class="contact__t">Адрес</div>
+                        <div class="contact__v">Центр города • 5 минут от площади</div>
+                        <div class="contact__h">Подтяни реальный адрес из конфига</div>
+                    </div>
+                    <div class="contact contact--accent">
+                        <div class="contact__t">Доставка</div>
+                        <div class="contact__v">Пикап • Курьер • Предзаказ</div>
+                        <div class="contact__h">Зоны/время — добавишь позже</div>
+                    </div>
+                    <div class="contact">
+                        <div class="contact__t">Связь</div>
+                        <div class="contact__v">+373 XX XXX XXX • Instagram • Telegram</div>
+                        <div class="contact__h">Ссылки — в runtimeConfig</div>
+                    </div>
+                </div>
+
+                <div class="finalCta">
+                    <NuxtLink class="btn btn--primary" to="/booking" @mousemove="onBtnMove" @mouseleave="onBtnLeave">
+                        Бронь</NuxtLink>
+                    <NuxtLink class="btn btn--soft" to="/menu" @mousemove="onBtnMove" @mouseleave="onBtnLeave">Заказ
+                    </NuxtLink>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="wrap footer__inner">
+                <div>© For-Love Coffee</div>
+                <div class="muted">Сделано с любовью ☕</div>
+            </div>
+        </footer>
+    </main>
+</template>
+
+<script setup lang="ts">
+const threeCanvas = ref<HTMLCanvasElement | null>(null);
+
+const logoUrl = "/logo.svg";
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+/* UI state */
+const menuOpen = ref(false);
+
+/* reduced motion */
+const reduceMotion = ref(false);
+let mq: MediaQueryList | null = null;
+const setReduceMotion = () => (reduceMotion.value = Boolean(mq?.matches));
+
+/* parallax */
+const mx = ref(0);
+const my = ref(0);
+const tx = ref(0);
+const ty = ref(0);
+let raf = 0;
+
+const tick = () => {
+    tx.value += (mx.value - tx.value) * 0.08;
+    ty.value += (my.value - ty.value) * 0.08;
+    raf = requestAnimationFrame(tick);
+};
+
+const onMove = (e: MouseEvent) => {
+    if (reduceMotion.value) return;
+    const el = e.currentTarget as HTMLElement;
+    const r = el.getBoundingClientRect();
+    mx.value = clamp(((e.clientX - r.left) / r.width - 0.5) * 2, -1, 1);
+    my.value = clamp(((e.clientY - r.top) / r.height - 0.5) * 2, -1, 1);
+};
+const onLeave = () => { mx.value = 0; my.value = 0; };
+
+const introStyle = computed(() => {
+    if (reduceMotion.value) return {};
+    return { transform: `translate3d(${tx.value * 8}px, ${ty.value * 6}px, 0)` };
+});
+const cardStyle = computed(() => {
+    if (reduceMotion.value) return {};
+    const rx = ty.value * -6;
+    const ry = tx.value * 8;
+    const dx = tx.value * -14;
+    const dy = ty.value * -10;
+    return { transform: `translate3d(${dx}px, ${dy}px, 0) rotateX(${rx}deg) rotateY(${ry}deg)` };
+});
+
+/* magnetic buttons */
+const onBtnMove = (e: MouseEvent) => {
+    if (reduceMotion.value) return;
+    const el = e.currentTarget as HTMLElement;
+    const r = el.getBoundingClientRect();
+    const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    el.style.setProperty("--bx", `${clamp(nx, -1, 1) * 6}px`);
+    el.style.setProperty("--by", `${clamp(ny, -1, 1) * 5}px`);
+};
+const onBtnLeave = (e: MouseEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    el.style.setProperty("--bx", "0px");
+    el.style.setProperty("--by", "0px");
+};
+
+/* open/closed */
+const OPEN_H = 9;
+const CLOSE_H = 22;
+const now = ref(new Date());
+let timer = 0;
+
+const isOpen = computed(() => {
+    const h = now.value.getHours();
+    const m = now.value.getMinutes();
+    const minutes = h * 60 + m;
+    return minutes >= OPEN_H * 60 && minutes < CLOSE_H * 60;
+});
+const statusText = computed(() => (isOpen.value ? "Открыто сейчас" : "Сейчас закрыто"));
+
+/* scroll progress */
+const scrollY = ref(0);
+const scrollProgress = ref(0);
+
+const onScroll = () => {
+    const y = window.scrollY || 0;
+    scrollY.value = y;
+
+    const doc = document.documentElement;
+    const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
+    scrollProgress.value = clamp(y / max, 0, 1);
+};
+
+/* reveal */
+const aboutEl = ref<HTMLElement | null>(null);
+const menuEl = ref<HTMLElement | null>(null);
+const reviewsEl = ref<HTMLElement | null>(null);
+const visitEl = ref<HTMLElement | null>(null);
+
+const inView = ref({ about: false, menu: false, reviews: false, visit: false });
+let io: IntersectionObserver | null = null;
+
+const observe = (elRef: Ref<HTMLElement | null>, key: keyof typeof inView.value) => {
+    const el = elRef.value;
+    if (!el || !io) return;
+    el.dataset.revealKey = String(key);
+    io.observe(el);
+};
+
+const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: reduceMotion.value ? "auto" : "smooth", block: "start" });
+};
+const goSection = (id: string) => {
+    menuOpen.value = false;
+    requestAnimationFrame(() => scrollTo(id));
+};
+
+/* THREE background (dynamic import => no TS errors) */
+let cleanupThree: null | (() => void) = null;
+
+const initThree = async () => {
+    if (!threeCanvas.value) return () => { };
+
+    const THREE = await import("three");
+
+    const canvas = threeCanvas.value;
+
+    const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000000, 0.08);
+
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+    camera.position.set(0, 0, 10);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const key = new THREE.DirectionalLight(0xffffff, 0.75);
+    key.position.set(6, 4, 8);
+    scene.add(key);
+
+    const rim = new THREE.PointLight(0xffd1d1, 1.2, 40);
+    rim.position.set(-6, -2, 10);
+    scene.add(rim);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // better materials
+    const matA = new THREE.MeshPhysicalMaterial({
+        color: 0xb24a4a,
+        metalness: 0.35,
+        roughness: 0.22,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.25,
+        emissive: 0x1a0000,
+        emissiveIntensity: 0.25,
+    });
+    const matB = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        metalness: 0.12,
+        roughness: 0.18,
+        transparent: true,
+        opacity: 0.18,
+    });
+
+    // centerpiece: torus knot + rings + “bubbles”
+    const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(1.3, 0.28, 280, 20, 2, 5), matA);
+    knot.position.set(0.25, 0.1, 0);
+    group.add(knot);
+
+    const ringGeo = new THREE.TorusGeometry(1.75, 0.08, 18, 160);
+    const ring1 = new THREE.Mesh(ringGeo, matB);
+    ring1.position.set(-0.4, -0.2, -1.2);
+    ring1.rotation.set(0.9, 0.1, 0.3);
+    group.add(ring1);
+
+    const ring2 = new THREE.Mesh(ringGeo, matB);
+    ring2.position.set(0.8, 0.5, -2.3);
+    ring2.rotation.set(0.2, 0.8, 0.6);
+    group.add(ring2);
+
+    const orbGeo = new THREE.SphereGeometry(0.22, 22, 22);
+    const orbs: THREE.Mesh[] = [];
+    for (let i = 0; i < 26; i++) {
+        const m = new THREE.Mesh(orbGeo, matB);
+        m.position.set((Math.random() - 0.5) * 9, (Math.random() - 0.5) * 5.5, -Math.random() * 9);
+        m.scale.setScalar(Math.random() * 1.8 + 0.55);
+        group.add(m);
+        orbs.push(m);
+    }
+
+    const clock = new THREE.Clock();
+
+    const resize = () => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+    };
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+
+    let anim = 0;
+
+    const animate = () => {
+        anim = requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+        const motion = reduceMotion.value ? 0.2 : 1;
+
+        group.rotation.y = (t * 0.18 + tx.value * 0.6) * motion;
+        group.rotation.x = (t * 0.12 + ty.value * 0.5) * motion;
+
+        knot.rotation.z = t * 0.22 * motion;
+        ring1.rotation.z = -t * 0.14 * motion;
+        ring2.rotation.z = t * 0.12 * motion;
+
+        for (let i = 0; i < orbs.length; i++) {
+            const o = orbs[i];
+            o.position.y += Math.sin(t * 0.6 + i) * 0.0010 * motion;
+            o.position.x += Math.cos(t * 0.45 + i) * 0.0008 * motion;
+        }
+
+        camera.position.z = 10 + scrollProgress.value * 1.7;
+        camera.position.y = -scrollProgress.value * 0.9;
+
+        renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+        window.removeEventListener("resize", resize);
+        cancelAnimationFrame(anim);
+
+        scene.traverse((obj: any) => {
+            if (!obj?.isMesh) return;
+            obj.geometry?.dispose?.();
+            if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose?.());
+            else obj.material?.dispose?.();
+        });
+
+        renderer.dispose?.();
+    };
+};
+
+onMounted(async () => {
+    mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion();
+    mq.addEventListener?.("change", setReduceMotion);
+
+    raf = requestAnimationFrame(tick);
+
+    timer = window.setInterval(() => (now.value = new Date()), 30_000);
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    io = new IntersectionObserver(
+        (entries) => {
+            for (const e of entries) {
+                if (!e.isIntersecting) continue;
+                const key = e.target.dataset.revealKey as keyof typeof inView.value | undefined;
+                if (key) inView.value[key] = true;
+            }
+        },
+        { threshold: 0.18, rootMargin: "0px 0px -10% 0px" }
+    );
+
+    observe(aboutEl, "about");
+    observe(menuEl, "menu");
+    observe(reviewsEl, "reviews");
+    observe(visitEl, "visit");
+
+    try {
+        cleanupThree = await initThree();
+    } catch (e) {
+        console.warn("Three init failed:", e);
+    }
+});
+
+onBeforeUnmount(() => {
+    cancelAnimationFrame(raf);
+    mq?.removeEventListener?.("change", setReduceMotion);
+
+    if (timer) window.clearInterval(timer);
+    window.removeEventListener("scroll", onScroll);
+
+    io?.disconnect?.();
+    cleanupThree?.();
+});
+</script>
+
+<style scoped>
+/* ===== base ===== */
+.landing {
+    --header-h: 72px;
+    --wrap: 1180px;
+    --glass: rgba(255, 255, 255, .10);
+    --glass2: rgba(255, 255, 255, .06);
+    --line: rgba(255, 255, 255, .12);
+    --txt: rgba(255, 255, 255, .92);
+    --muted: rgba(255, 255, 255, .72);
+    --brand: #b24a4a;
+
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    min-height: 100vh;
+    background: #000;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    padding-top: var(--header-h);
+    position: relative;
+    overflow-x: hidden;
+}
+
+.three {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .92;
+}
+
+/* background gradients */
+.bg {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background:
+        radial-gradient(900px 520px at 18% 18%, rgba(178, 74, 74, .25), transparent 60%),
+        radial-gradient(820px 520px at 82% 58%, rgba(255, 255, 255, .10), transparent 62%),
+        linear-gradient(180deg, rgba(0, 0, 0, .66) 0%, rgba(0, 0, 0, .18) 45%, rgba(0, 0, 0, .72) 100%);
+}
+
+/* grain */
+.grain {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: .12;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+}
+
+/* progress */
+.progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 60;
+    background: rgba(255, 255, 255, .06);
+    backdrop-filter: blur(12px);
+}
+
+.progress__bar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, rgba(178, 74, 74, .95), rgba(255, 255, 255, .55));
+}
+
+/* topbar */
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-h);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    transition: background .18s ease, border-color .18s ease;
+}
+
+.topbar--solid {
+    background: rgba(10, 10, 10, .52);
+    border-bottom: 1px solid rgba(255, 255, 255, .10);
+    backdrop-filter: blur(18px) saturate(1.25);
+}
+
+.topbar__inner {
+    width: min(var(--wrap), 92vw);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+/* brand */
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .07);
+    color: var(--txt);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+}
+
+.brand__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(178, 74, 74, .98);
+    box-shadow: 0 0 0 4px rgba(178, 74, 74, .18);
+}
+
+.brand__txt {
+    font-weight: 950;
+    letter-spacing: -.02em;
+}
+
+.brand__logo {
+    width: 18px;
+    height: auto;
+    transform: translateY(1px);
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .25));
+}
+
+/* nav */
+.nav {
+    display: inline-flex;
+    gap: 10px;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .05);
+    backdrop-filter: blur(14px);
+}
+
+.nav__item {
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, .84);
+    font-weight: 850;
+    padding: 10px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .16s ease, background .16s ease, color .16s ease;
+}
+
+.nav__item:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, .10);
+    color: rgba(255, 255, 255, .94);
+}
+
+.topbar__right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* chip */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .06);
+    color: rgba(255, 255, 255, .88);
+    backdrop-filter: blur(14px);
+}
+
+.chip__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+}
+
+.chip--open .chip__dot {
+    background: rgba(178, 74, 74, .98);
+    box-shadow: 0 0 0 4px rgba(178, 74, 74, .16);
+}
+
+.chip--closed .chip__dot {
+    background: rgba(255, 255, 255, .82);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, .12);
+}
+
+.chip__txt {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .03em;
+}
+
+.chip__time {
+    font-size: 12px;
+    font-weight: 900;
+    opacity: .74;
+}
+
+/* overlay menu */
+.overlayMenu {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .18s ease;
+}
+
+.overlayMenu--open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.overlayMenu__bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
+    backdrop-filter: blur(8px);
+}
+
+.overlayMenu__panel {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    width: min(440px, calc(100vw - 36px));
+    padding: 16px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .12);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, .45);
+    transform: translateY(-8px);
+    transition: transform .18s ease;
+}
+
+.overlayMenu--open .overlayMenu__panel {
+    transform: translateY(0);
+}
+
+.overlayMenu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.overlayMenu__title {
+    font-weight: 950;
+    color: rgba(255, 255, 255, .92);
+}
+
+.iconBtn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .06);
+    color: rgba(255, 255, 255, .92);
+    cursor: pointer;
+}
+
+.overlayMenu__links {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.overlayLink {
+    text-align: left;
+    border-radius: 16px;
+    padding: 14px 12px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .05);
+    color: rgba(255, 255, 255, .90);
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform .16s ease, background .16s ease;
+}
+
+.overlayLink:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, .09);
+}
+
+.overlayMenu__cta {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.overlayMenu__hint {
+    margin-top: 10px;
+    color: rgba(255, 255, 255, .66);
+    font-weight: 850;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+/* stage */
+.stage {
+    position: relative;
+    z-index: 10;
+    width: min(var(--wrap), 92vw);
+    margin: 0 auto;
+    min-height: calc(100vh - var(--header-h));
+    display: grid;
+    grid-template-columns: 1.08fr .92fr;
+    align-items: center;
+    gap: clamp(14px, 3vw, 44px);
+    padding: clamp(18px, 3vw, 54px) 0;
+    perspective: 900px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .06);
+    backdrop-filter: blur(12px);
+    color: rgba(255, 255, 255, .86);
+}
+
+.badge__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(178, 74, 74, .98);
+    box-shadow: 0 0 0 4px rgba(178, 74, 74, .18);
+}
+
+.badge__text {
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.h1 {
+    margin: 14px 0 0;
+    color: var(--txt);
+    font-weight: 980;
+    letter-spacing: -.03em;
+    line-height: 1.02;
+    font-size: clamp(38px, 5.4vw, 78px);
+    text-shadow: 0 26px 90px rgba(0, 0, 0, .55);
+}
+
+.p {
+    margin: 14px 0 0;
+    max-width: 58ch;
+    color: rgba(255, 255, 255, .80);
+    font-weight: 850;
+    line-height: 1.55;
+    font-size: clamp(14px, 1.55vw, 18px);
+}
+
+.actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.featureRow {
+    margin-top: 18px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .06);
+    backdrop-filter: blur(12px);
+}
+
+.feature__ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(178, 74, 74, .16);
+    border: 1px solid rgba(178, 74, 74, .22);
+}
+
+.feature__t {
+    color: rgba(255, 255, 255, .92);
+    font-weight: 950;
+}
+
+.feature__s {
+    color: rgba(255, 255, 255, .68);
+    font-weight: 850;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.scrollHint {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(255, 255, 255, .86);
+}
+
+.scrollHint__mouse {
+    width: 22px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .32);
+    position: relative;
+}
+
+.scrollHint__mouse::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .85);
+    transform: translateX(-50%);
+    animation: scrollDot 1.2s ease-in-out infinite;
+}
+
+@keyframes scrollDot {
+    0% {
+        transform: translate(-50%, 0);
+        opacity: .9;
+    }
+
+    70% {
+        transform: translate(-50%, 14px);
+        opacity: .5;
+    }
+
+    100% {
+        transform: translate(-50%, 0);
+        opacity: .9;
+    }
+}
+
+.scrollHint__txt {
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+}
+
+/* 3d card */
+.card3d {
+    position: relative;
+    border-radius: 28px;
+    padding: 18px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .20);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .22);
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.card3d__shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    pointer-events: none;
+    background: radial-gradient(680px 260px at 16% 10%, rgba(255, 255, 255, .20), transparent 60%);
+}
+
+.card3d__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: rgba(255, 255, 255, .80);
+    font-weight: 900;
+}
+
+.card3d__k {
+    opacity: .8;
+}
+
+.card3d__v {
+    color: rgba(255, 255, 255, .92);
+}
+
+.card3d__big {
+    margin-top: 12px;
+}
+
+.card3d__brand {
+    font-weight: 980;
+    letter-spacing: -.03em;
+    color: rgba(255, 255, 255, .92);
+    font-size: clamp(28px, 3.2vw, 44px);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.card3d__logo {
+    width: 34px;
+    height: auto;
+    transform: translateY(4px);
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, .25));
+}
+
+.card3d__sub {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, .70);
+    font-weight: 900;
+}
+
+.stats {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat {
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .12);
+}
+
+.stat__n {
+    font-weight: 950;
+    color: rgba(255, 255, 255, .92);
+}
+
+.stat__l {
+    margin-top: 4px;
+    font-weight: 850;
+    color: rgba(255, 255, 255, .66);
+    font-size: 12px;
+}
+
+.card3d__btns {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+/* buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 999px;
+    padding: 13px 18px;
+    border: 1px solid transparent;
+    font-weight: 950;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+    transform: translate3d(var(--bx, 0px), var(--by, 0px), 0);
+}
+
+.btn--wide {
+    width: 100%;
+}
+
+.btn--sm {
+    padding: 10px 12px;
+    font-size: 13px;
+}
+
+.btn--primary {
+    background: var(--brand);
+    color: #fff;
+    box-shadow: 0 18px 56px rgba(178, 74, 74, .30);
+}
+
+.btn--primary:hover {
+    background: #9b3e3e;
+    box-shadow: 0 22px 70px rgba(178, 74, 74, .34);
+}
+
+.btn--ghost {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .16);
+    color: rgba(255, 255, 255, .92);
+    backdrop-filter: blur(12px);
+}
+
+.btn--ghost:hover {
+    background: rgba(255, 255, 255, .12);
+}
+
+.btn--soft {
+    background: rgba(255, 255, 255, .18);
+    border-color: rgba(255, 255, 255, .20);
+    color: rgba(15, 15, 15, .90);
+}
+
+.btn--soft:hover {
+    background: rgba(255, 255, 255, .24);
+}
+
+/* sections */
+.section {
+    position: relative;
+    z-index: 10;
+    padding: clamp(56px, 7vw, 96px) 0;
+}
+
+.section--alt {
+    background: radial-gradient(900px 360px at 50% 0%, rgba(178, 74, 74, .10), transparent 60%),
+        rgba(255, 255, 255, .03);
+    border-top: 1px solid rgba(255, 255, 255, .06);
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.wrap {
+    width: min(var(--wrap), 92vw);
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(8px);
+    transition: opacity .52s ease, transform .52s ease, filter .52s ease;
+}
+
+.section.is-in .wrap {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+}
+
+.kicker {
+    font-weight: 950;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: rgba(255, 255, 255, .72);
+}
+
+.h2 {
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, .92);
+    font-weight: 980;
+    letter-spacing: -.02em;
+    font-size: clamp(26px, 3.2vw, 44px);
+}
+
+.p2 {
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, .76);
+    font-weight: 850;
+    line-height: 1.55;
+    max-width: 70ch;
+}
+
+.grid2 {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.panel {
+    border-radius: 22px;
+    padding: 18px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .22);
+}
+
+.panel--accent {
+    background: rgba(178, 74, 74, .14);
+    border-color: rgba(178, 74, 74, .22);
+}
+
+.panel__t {
+    font-weight: 980;
+    color: rgba(255, 255, 255, .92);
+}
+
+.panel__p {
+    margin-top: 10px;
+    font-weight: 850;
+    color: rgba(255, 255, 255, .76);
+    line-height: 1.55;
+}
+
+.chips {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pill {
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .06);
+    color: rgba(255, 255, 255, .74);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.miniStats {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.miniStat {
+    padding: 12px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .06);
+}
+
+.miniStat__n {
+    color: rgba(255, 255, 255, .92);
+    font-weight: 980;
+}
+
+.miniStat__l {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, .66);
+    font-weight: 850;
+    font-size: 12px;
+}
+
+/* menu grid */
+.menuGrid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.item {
+    border-radius: 22px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .06);
+    backdrop-filter: blur(14px);
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.item:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, .09);
+    border-color: rgba(255, 255, 255, .14);
+}
+
+.item--glow {
+    border-color: rgba(178, 74, 74, .30);
+    box-shadow: 0 18px 70px rgba(178, 74, 74, .16);
+}
+
+.item__h {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.item__n {
+    color: rgba(255, 255, 255, .92);
+    font-weight: 980;
+}
+
+.price {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(178, 74, 74, .18);
+    border: 1px solid rgba(178, 74, 74, .22);
+    color: rgba(255, 255, 255, .86);
+    font-weight: 980;
+}
+
+.item__d {
+    margin-top: 10px;
+    color: rgba(255, 255, 255, .74);
+    font-weight: 850;
+    line-height: 1.5;
+}
+
+.tags {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .05);
+    color: rgba(255, 255, 255, .70);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.sectionCta {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* reviews */
+.reviewGrid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.review {
+    border-radius: 22px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .06);
+    backdrop-filter: blur(14px);
+}
+
+.review--accent {
+    background: rgba(178, 74, 74, .14);
+    border-color: rgba(178, 74, 74, .22);
+}
+
+.review__top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ava {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, .10);
+    border: 1px solid rgba(255, 255, 255, .12);
+    color: rgba(255, 255, 255, .92);
+    font-weight: 980;
+}
+
+.review__name {
+    color: rgba(255, 255, 255, .92);
+    font-weight: 980;
+}
+
+.review__meta {
+    color: rgba(255, 255, 255, .66);
+    font-weight: 850;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.stars {
+    margin-left: auto;
+    color: rgba(255, 255, 255, .84);
+    font-weight: 980;
+    letter-spacing: .10em;
+}
+
+.review__txt {
+    margin-top: 12px;
+    color: rgba(255, 255, 255, .78);
+    font-weight: 850;
+    line-height: 1.55;
+}
+
+/* contacts */
+.contactGrid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.contact {
+    border-radius: 22px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .06);
+    backdrop-filter: blur(14px);
+}
+
+.contact--accent {
+    background: rgba(178, 74, 74, .14);
+    border-color: rgba(178, 74, 74, .22);
+}
+
+.contact__t {
+    color: rgba(255, 255, 255, .92);
+    font-weight: 980;
+}
+
+.contact__v {
+    margin-top: 10px;
+    color: rgba(255, 255, 255, .78);
+    font-weight: 850;
+    line-height: 1.5;
+}
+
+.contact__h {
+    margin-top: 10px;
+    color: rgba(255, 255, 255, .62);
+    font-weight: 850;
+    font-size: 12px;
+}
+
+.finalCta {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* footer */
+.footer {
+    position: relative;
+    z-index: 10;
+    padding: 24px 0 34px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .22);
+    backdrop-filter: blur(12px);
+}
+
+.footer__inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: rgba(255, 255, 255, .72);
+    font-weight: 850;
+}
+
+.muted {
+    opacity: .8;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+    .menuGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 980px) {
+    .nav {
+        display: none;
+    }
+
+    .stage {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .actions {
+        justify-content: center;
+    }
+
+    .featureRow {
+        justify-content: center;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    .reviewGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .contactGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .btn {
+        width: 100%;
+    }
+
+    .chip {
+        display: none;
+    }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .scrollHint__mouse::after {
+        animation: none !important;
+    }
+}
+</style>
+ForLoveCoffee-main/app/components/Landing3D.vue
+//////////////////////////////////////////////////////

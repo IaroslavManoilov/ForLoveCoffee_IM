@@ -1,0 +1,6091 @@
+/*
+<template>
+  <div class="page">
+    <h1>Контакты</h1>
+
+    <div class="box">
+      <div><b>Телефон:</b> +373 XX XXX XXX</div>
+      <div><b>Адрес:</b> Chișinău, ...</div>
+      <div><b>Часы:</b> 09:00 – 22:00</div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.page {
+  min-height: 100vh;
+  padding: 140px 40px 40px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 44px;
+  margin: 0 0 16px;
+}
+
+.box {
+  font-size: 20px;
+  line-height: 1.6;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.04);
+  max-width: 700px;
+}
+</style>
+
+*/
+
+
+/*
+<template>
+  <div class="page" @mousemove="onMouseMove">
+    <!-- фоновые слои -->
+    <div class="bg">
+      <div class="bg__warm" />
+      <div class="bg__grain" />
+      <div class="bg__blob bg__blob--1" />
+      <div class="bg__blob bg__blob--2" />
+    </div>
+
+    <main class="wrap">
+      <!-- верхний блок -->
+      <section class="intro" :style="tiltStyle">
+        <div class="intro__badge">☕ Контакты & Атмосфера</div>
+
+        <h1 class="intro__title">
+          Давай общаться<span class="dot">.</span>
+        </h1>
+
+        <p class="intro__text">
+          Мы всегда рады старым друзьям и новым знакомствам. Если у тебя есть вопрос по зерну,
+          предложение или ты просто хочешь сказать «привет» — мы на связи.
+        </p>
+
+        <div class="intro__actions">
+          <a class="btn btn--primary" :href="telHref">
+            <span class="btn__icon" aria-hidden="true">
+              <IconPhone />
+            </span>
+            Позвонить
+          </a>
+
+          <button class="btn btn--ghost" type="button" @click="copy(phone)">
+            <span class="btn__icon" aria-hidden="true">
+              <IconCopy />
+            </span>
+            Скопировать номер
+          </button>
+
+          <NuxtLink class="btn btn--soft" to="/menu">
+            <span class="btn__icon" aria-hidden="true">
+              <IconCup />
+            </span>
+            Посмотреть меню
+          </NuxtLink>
+        </div>
+
+        <div class="toast" :data-show="toast.show" role="status" aria-live="polite">
+          <span class="toast__dot" aria-hidden="true" />
+          {{ toast.text }}
+        </div>
+      </section>
+
+      <!-- контент -->
+      <section class="grid">
+        <!-- карточка контактов -->
+        <article class="card reveal" ref="revealRoot">
+          <div class="card__head">
+            <h2 class="card__title">Наши контакты</h2>
+            <p class="card__subtitle">Быстро, просто, по-человечески.</p>
+          </div>
+
+          <div class="list">
+            <div class="item">
+              <div class="item__icon" aria-hidden="true"><IconPhone /></div>
+              <div class="item__body">
+                <div class="item__label">Телефон</div>
+                <div class="item__value">
+                  <a class="link" :href="telHref">{{ phone }}</a>
+                  <button class="mini" type="button" @click="copy(phone)">Скопировать</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="item__icon" aria-hidden="true"><IconPin /></div>
+              <div class="item__body">
+                <div class="item__label">Где мы?</div>
+                <div class="item__value">
+                  <span>{{ address }}</span>
+                  <a class="mini link" :href="mapsHref" target="_blank" rel="noopener">
+                    Открыть в картах
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="item__icon" aria-hidden="true"><IconClock /></div>
+              <div class="item__body">
+                <div class="item__label">Часы</div>
+                <div class="item__value">
+                  <span>{{ hours }}</span>
+                  <span class="pill" :data-open="isOpenNow">
+                    {{ isOpenNow ? "Сейчас открыто" : "Сейчас закрыто" }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider" />
+
+          <div class="callout">
+            <div class="callout__title">Почему наш кофе — это про людей?</div>
+            <p class="callout__text">
+              За каждой чашкой стоит фермер, обжарщик и бариста, но главное в ней — ты.
+              Мы верим, что лучший напиток получается там, где есть искренний диалог и любовь к делу.
+            </p>
+          </div>
+        </article>
+
+        <!-- соцсети -->
+        <article class="card card--accent reveal">
+          <div class="card__head">
+            <h2 class="card__title">Мы в соцсетях</h2>
+            <p class="card__subtitle">Там — новости, эстетика и живые моменты.</p>
+          </div>
+
+          <div class="social">
+            <a
+              v-for="s in socials"
+              :key="s.title"
+              class="social__btn"
+              :href="s.href"
+              target="_blank"
+              rel="noopener"
+              @click="track(s.title)"
+            >
+              <span class="social__icon" aria-hidden="true">
+                <component :is="s.icon" />
+              </span>
+              <span class="social__text">
+                <span class="social__title">{{ s.title }}</span>
+                <span class="social__desc">{{ s.desc }}</span>
+              </span>
+              <span class="social__arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
+
+          <div class="divider" />
+
+          <div class="features">
+            <div class="feature">
+              <div class="feature__icon" aria-hidden="true"><IconHeart /></div>
+              <div class="feature__text">
+                <div class="feature__title">For People</div>
+                <div class="feature__desc">Запоминаем вкусы постоянных гостей.</div>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature__icon" aria-hidden="true"><IconStar /></div>
+              <div class="feature__text">
+                <div class="feature__title">Качество</div>
+                <div class="feature__desc">Работаем с проверенным зерном.</div>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature__icon" aria-hidden="true"><IconSpark /></div>
+              <div class="feature__text">
+                <div class="feature__title">Атмосфера</div>
+                <div class="feature__desc">Можно поработать или помолчать — уютно.</div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- карта -->
+        <article class="card map reveal">
+          <div class="card__head">
+            <h2 class="card__title">Загляни к нам</h2>
+            <p class="card__subtitle">Один шаг до тёплой чашки и хорошего дня.</p>
+          </div>
+
+          <div class="map__frame">
+            <!-- ЗАМЕНИ src на свою карту (Google / OpenStreetMap embed).
+                 Сейчас стоит безопасная заглушка с "Chisinau" -->
+            <iframe
+              :src="mapEmbedSrc"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Карта"
+            />
+          </div>
+
+          <div class="map__footer">
+            <button class="btn btn--primary" type="button" @click="copy(address)">
+              <span class="btn__icon" aria-hidden="true"><IconCopy /></span>
+              Скопировать адрес
+            </button>
+
+            <a class="btn btn--ghost" :href="mapsHref" target="_blank" rel="noopener">
+              <span class="btn__icon" aria-hidden="true"><IconPin /></span>
+              Открыть в картах
+            </a>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+
+useHead({
+  title: "Контакты — For Love Coffee",
+  meta: [
+    {
+      name: "description",
+      content:
+        "Контакты For Love Coffee: телефон, адрес, часы работы и соцсети. Заходи за вкусом, который согреет и подарит любовь.",
+    },
+  ],
+});
+
+const phone = "+373 68 514 544"; // ← замени на свой
+const address = "Chișinău, ул. Кофейная, 15"; // ← замени на свой
+const hours = "09:00 – 22:00"; // ← замени на свой
+
+const telHref = computed(() => `tel:${phone.replace(/[^\d+]/g, "")}`);
+const mapsHref = computed(() => {
+  const q = encodeURIComponent(address);
+  return `https://www.google.com/maps/search/?api=1&query=${q}`;
+});
+
+// Лёгкая проверка "открыто сейчас" (по локальному времени клиента)
+const isOpenNow = computed(() => {
+  // hours: "09:00 – 22:00"
+  const m = hours.match(/(\d{2}):(\d{2}).*?(\d{2}):(\d{2})/);
+  if (!m) return false;
+  const [_, sh, sm, eh, em] = m;
+  const start = Number(sh) * 60 + Number(sm);
+  const end = Number(eh) * 60 + Number(em);
+  const now = new Date();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return minutes >= start && minutes <= end;
+});
+
+// Карта (заглушка). Подставь свой embed при необходимости.
+const mapEmbedSrc = computed(() => {
+  // OpenStreetMap embed (без ключей)
+  // Подставь свои координаты bbox/marker если хочешь точнее.
+  return "https://www.openstreetmap.org/export/embed.html?bbox=28.78%2C46.98%2C28.93%2C47.08&layer=mapnik&marker=47.01%2C28.86";
+});
+
+const socials = [
+  {
+    title: "Telegram",
+    desc: "Новости и свежая обжарка",
+    href: "https://t.me/your_nick", // ← замени
+    icon: IconTelegram,
+  },
+  {
+    title: "Instagram",
+    desc: "Эстетика, видео и анонсы",
+    href: "https://instagram.com/your_account", // ← замени
+    icon: IconInstagram,
+  },
+  {
+    title: "Google Maps",
+    desc: "Маршрут в 1 клик",
+    href: mapsHref.value,
+    icon: IconMap,
+  },
+];
+
+const toast = reactive({ show: false, text: "" });
+let toastT: ReturnType<typeof setTimeout> | null = null;
+
+async function copy(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("Скопировано ✨");
+  } catch {
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast("Скопировано ✨");
+  }
+}
+
+function showToast(text: string) {
+  toast.text = text;
+  toast.show = true;
+  if (toastT) clearTimeout(toastT);
+  toastT = setTimeout(() => (toast.show = false), 1800);
+}
+
+function track(label: string) {
+  // сюда можно подключить аналитику, если появится
+  showToast(`Открываю: ${label}`);
+}
+
+const mx = ref(0);
+const my = ref(0);
+function onMouseMove(e: MouseEvent) {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  mx.value = (e.clientX - cx) / cx;
+  my.value = (e.clientY - cy) / cy;
+}
+const tiltStyle = computed(() => {
+  const rx = (my.value * -2.2).toFixed(2);
+  const ry = (mx.value * 2.2).toFixed(2);
+  return {
+    transform: `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`,
+  };
+});
+
+
+const revealRoot = ref<HTMLElement | null>(null);
+let io: IntersectionObserver | null = null;
+
+onMounted(() => {
+  const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+  io = new IntersectionObserver(
+    (entries) => {
+      for (const en of entries) {
+        if (en.isIntersecting) {
+          en.target.classList.add("reveal--in");
+          io?.unobserve(en.target);
+        }
+      }
+    },
+    { threshold: 0.15 }
+  );
+  els.forEach((el) => io?.observe(el));
+});
+
+onBeforeUnmount(() => {
+  if (io) io.disconnect();
+  if (toastT) clearTimeout(toastT);
+});
+function IconPhone() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M6.8 2.9c.5-.4 1.2-.4 1.7.1l2.1 2.3c.4.5.5 1.1.2 1.6l-1.1 2c-.2.4-.2.9 0 1.3a15.4 15.4 0 0 0 4.1 4.1c.4.2.9.2 1.3 0l2-1.1c.5-.3 1.2-.2 1.6.2l2.3 2.1c.5.5.5 1.2.1 1.7l-1.2 1.5c-.6.8-1.6 1.1-2.6.9-3.8-.7-7.3-2.9-10.3-5.9S4 9.2 3.3 5.4c-.2-1 .1-2 .9-2.6l1.6-1.3Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+function IconPin() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 22s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M12 12.1a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+      />
+    </svg>
+  );
+}
+function IconClock() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+      />
+      <path
+        d="M12 6v6l4 2"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+function IconCopy() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M9 9h10v12H9V9Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+    </svg>
+  );
+}
+function IconCup() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M16 10h2a3 3 0 0 1 0 6h-2"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+      <path
+        d="M7 3c0 2 2 2 2 4M11 3c0 2 2 2 2 4"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+    </svg>
+  );
+}
+function IconHeart() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 21s-7-4.4-9.2-8.7C1 8.7 3.2 5.8 6.4 5.5c1.8-.2 3.4.7 4.3 2 1-1.3 2.6-2.2 4.3-2 3.2.3 5.4 3.2 3.6 6.8C19 16.6 12 21 12 21Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+function IconStar() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.9 6.1 20l1.2-6.5L2.5 8.9 9.1 8 12 2Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+function IconSpark() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 2l1.2 4.2L17.5 7.5l-4.3 1.3L12 13l-1.2-4.2L6.5 7.5l4.3-1.3L12 2Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M19 12l.8 2.6L22 15l-2.2.4L19 18l-.8-2.6L16 15l2.2-.4L19 12Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+function IconTelegram() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M21.5 4.8 3.2 12.2c-1.1.4-1.1 1.9.1 2.3l4.7 1.6 1.8 5.6c.4 1.1 1.9 1.2 2.4.2l2.6-4.7 4.7 3.4c.8.6 2 .1 2.2-.9l2.7-14.1c.2-1.1-.9-2.1-2-1.8Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M8.1 16.1 20.6 6.2"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+    </svg>
+  );
+}
+function IconInstagram() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+      />
+      <path
+        d="M12 16.2A4.2 4.2 0 1 0 12 7.8a4.2 4.2 0 0 0 0 8.4Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+      />
+      <path
+        d="M17.5 6.5h.01"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+      />
+    </svg>
+  );
+}
+function IconMap() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M9 18 3.5 20V6l5.5-2 6 2 5.5-2v14L15 20l-6-2Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M9 4v14M15 6v14"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+    </svg>
+  );
+}
+</script>
+
+<style scoped>
+.page {
+  min-height: 100vh;
+  padding: 120px 18px 64px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #241b18;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+.bg__warm {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1100px 700px at 20% 10%, rgba(255, 228, 214, 0.9), transparent 60%),
+    radial-gradient(900px 600px at 85% 30%, rgba(255, 214, 196, 0.65), transparent 60%),
+    radial-gradient(900px 900px at 45% 100%, rgba(214, 170, 150, 0.35), transparent 60%),
+    linear-gradient(180deg, #fff 0%, #fbf5f1 45%, #f5ede8 100%);
+}
+.bg__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.bg__blob {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  filter: blur(40px);
+  opacity: 0.35;
+  border-radius: 999px;
+  transform: translate3d(0, 0, 0);
+}
+.bg__blob--1 {
+  left: -140px;
+  top: 120px;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 88, 52, 0.55), transparent 60%);
+  animation: floaty 12s ease-in-out infinite;
+}
+.bg__blob--2 {
+  right: -180px;
+  bottom: -140px;
+  background: radial-gradient(circle at 30% 30%, rgba(130, 70, 55, 0.55), transparent 60%);
+  animation: floaty 14s ease-in-out infinite reverse;
+}
+@keyframes floaty {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(22px, -18px) scale(1.03); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.intro {
+  border-radius: 26px;
+  padding: 26px 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow:
+    0 18px 50px rgba(32, 18, 14, 0.10),
+    0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  backdrop-filter: blur(10px);
+  transform-style: preserve-3d;
+  transition: transform 160ms ease;
+}
+
+.intro__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #7a3b2b;
+  font-size: 13px;
+}
+
+.intro__title {
+  margin: 14px 0 6px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+.dot {
+  color: #c45834;
+  text-shadow: 0 10px 25px rgba(196, 88, 52, 0.25);
+}
+.intro__text {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0.88;
+}
+
+.intro__actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  padding: 12px 16px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, border-color 120ms ease;
+  user-select: none;
+}
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn__icon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+}
+.btn__icon :deep(svg) {
+  width: 18px;
+  height: 18px;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, #c45834, #9b3f2a);
+  color: #fff;
+  box-shadow: 0 14px 26px rgba(196, 88, 52, 0.25);
+}
+.btn--primary:hover { box-shadow: 0 16px 32px rgba(196, 88, 52, 0.32); }
+
+.btn--ghost {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(80, 55, 48, 0.16);
+  color: #2a1f1c;
+}
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.72); }
+
+.btn--soft {
+  background: rgba(196, 88, 52, 0.10);
+  border-color: rgba(196, 88, 52, 0.20);
+  color: #7a3b2b;
+}
+.btn--soft:hover { background: rgba(196, 88, 52, 0.14); }
+
+.toast {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  box-shadow: 0 14px 26px rgba(32, 18, 14, 0.10);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.toast[data-show="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #c45834;
+  box-shadow: 0 10px 20px rgba(196, 88, 52, 0.35);
+}
+
+
+.grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 14px;
+}
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  border-radius: 26px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.10);
+  backdrop-filter: blur(10px);
+}
+.card--accent {
+  background:
+    radial-gradient(900px 500px at 30% 10%, rgba(196, 88, 52, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.62);
+}
+
+.card__head { margin-bottom: 14px; }
+.card__title {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+.card__subtitle {
+  margin: 6px 0 0;
+  opacity: 0.78;
+  line-height: 1.5;
+}
+
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+.item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(80, 55, 48, 0.10);
+}
+.item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(196, 88, 52, 0.10);
+  color: #7a3b2b;
+}
+.item__icon :deep(svg) { width: 20px; height: 20px; }
+
+.item__label {
+  font-size: 13px;
+  opacity: 0.70;
+  font-weight: 700;
+}
+.item__value {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-weight: 800;
+}
+.link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(196, 88, 52, 0.45);
+}
+.link:hover { border-bottom-style: solid; }
+
+.mini {
+  font-size: 12px;
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+}
+.mini:hover { background: rgba(255, 255, 255, 0.72); }
+
+.pill {
+  font-size: 12px;
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+.pill[data-open="true"] {
+  border-color: rgba(47, 140, 84, 0.28);
+  background: rgba(47, 140, 84, 0.10);
+}
+
+
+.divider {
+  height: 1px;
+  margin: 16px 0;
+  background: linear-gradient(90deg, transparent, rgba(80, 55, 48, 0.16), transparent);
+}
+.callout {
+  padding: 14px 14px;
+  border-radius: 18px;
+  background: rgba(196, 88, 52, 0.08);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+}
+.callout__title {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.callout__text {
+  margin: 8px 0 0;
+  opacity: 0.88;
+  line-height: 1.6;
+}
+
+
+.social {
+  display: grid;
+  gap: 10px;
+}
+.social__btn {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+.social__btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(196, 88, 52, 0.24);
+}
+.social__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(196, 88, 52, 0.10);
+  color: #7a3b2b;
+}
+.social__icon :deep(svg) { width: 22px; height: 22px; }
+
+.social__title { font-weight: 1000; }
+.social__desc {
+  display: block;
+  opacity: 0.76;
+  font-size: 13px;
+  margin-top: 2px;
+}
+.social__arrow {
+  font-weight: 1000;
+  opacity: 0.65;
+}
+
+.features {
+  display: grid;
+  gap: 10px;
+}
+.feature {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(80, 55, 48, 0.10);
+}
+.feature__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(196, 88, 52, 0.10);
+  color: #7a3b2b;
+}
+.feature__icon :deep(svg) { width: 22px; height: 22px; }
+.feature__title { font-weight: 1000; }
+.feature__desc { opacity: 0.78; font-size: 13px; margin-top: 2px; }
+
+
+.map__frame {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  background: rgba(255, 255, 255, 0.55);
+  height: 320px;
+}
+.map__frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: saturate(0.98) contrast(1.02);
+}
+.map__footer {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+.reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 520px) {
+  .page { padding-top: 110px; }
+  .intro { padding: 22px 16px; }
+  .card { padding: 16px; }
+  .map__frame { height: 260px; }
+}
+</style>
+
+*/
+/*
+<template>
+  <div class="menu-page">
+    <!-- top glow -->
+    <div class="glow" aria-hidden="true"></div>
+
+    <div class="container">
+      <div class="title-wrap">
+        <div class="pill">❤️ Меню с любовью</div>
+        <h1>
+          Выбери свой <span>кофейный момент</span>
+        </h1>
+        <p class="sub">
+          Напитки и десерты, к которым хочется вернуться.
+        </p>
+
+        <div class="toolbar">
+          <div class="tabs">
+            <button
+              class="tab"
+              :class="{ active: activeTab === 'all' }"
+              @click="activeTab = 'all'"
+            >
+              Всё
+            </button>
+            <button
+              class="tab"
+              :class="{ active: activeTab === 'drinks' }"
+              @click="activeTab = 'drinks'"
+            >
+              Кофе & Чай
+            </button>
+            <button
+              class="tab"
+              :class="{ active: activeTab === 'pancakes' }"
+              @click="activeTab = 'pancakes'"
+            >
+              Сладкие блины
+            </button>
+          </div>
+
+          <div class="search">
+            <span class="search-ic" aria-hidden="true">⌕</span>
+            <input
+              v-model.trim="query"
+              type="text"
+              placeholder="Поиск по меню…"
+              aria-label="Поиск по меню"
+            />
+            <button v-if="query" class="clear" @click="query = ''" aria-label="Очистить поиск">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- layout like your screenshot: left drinks, right pancakes -->
+      <div class="grid">
+        <!-- Left -->
+        <section v-if="showDrinks" class="col">
+          <div class="section-head">
+            <div class="section-title">
+              ☕️ <span>Кофе & Чай</span>
+            </div>
+            <div class="section-hint">4 кофе + 1 чай</div>
+          </div>
+
+          <div class="cards">
+            <article
+              v-for="item in filteredDrinks"
+              :key="item.id"
+              class="card"
+              @mousemove="onTilt($event)"
+              @mouseleave="resetTilt($event)"
+            >
+              <div class="card-inner">
+                <div class="card-text">
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.desc }}</p>
+
+                  <div class="card-actions">
+                    <button class="want" @click="addToCart(item)">
+                      Хочу
+                    </button>
+                    <div class="price">
+                      <span class="num">{{ item.price }}</span>
+                      <span class="cur">лей</span>
+                    </div>
+
+                    <button class="more" @click="openModal(item)">
+                      Подробнее
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card-media">
+                  <img
+                    :src="item.image"
+                    :alt="item.title"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              </div>
+
+              <div class="card-badge" v-if="item.badge">
+                {{ item.badge }}
+              </div>
+            </article>
+
+            <div v-if="filteredDrinks.length === 0" class="empty">
+              Ничего не найдено в “Кофе & Чай”.
+            </div>
+          </div>
+        </section>
+
+        <!-- Right -->
+        <section v-if="showPancakes" class="col">
+          <div class="section-head">
+            <div class="section-title">
+              🥞 <span>Сладкие блины</span>
+            </div>
+            <div class="section-hint">3 позиции</div>
+          </div>
+
+          <div class="cards">
+            <article
+              v-for="item in filteredPancakes"
+              :key="item.id"
+              class="card"
+              @mousemove="onTilt($event)"
+              @mouseleave="resetTilt($event)"
+            >
+              <div class="card-inner">
+                <div class="card-text">
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.desc }}</p>
+
+                  <div class="card-actions">
+                    <button class="want" @click="addToCart(item)">
+                      Хочу
+                    </button>
+                    <div class="price">
+                      <span class="num">{{ item.price }}</span>
+                      <span class="cur">лей</span>
+                    </div>
+
+                    <button class="more" @click="openModal(item)">
+                      Подробнее
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card-media">
+                  <img
+                    :src="item.image"
+                    :alt="item.title"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              </div>
+
+              <div class="card-badge" v-if="item.badge">
+                {{ item.badge }}
+              </div>
+            </article>
+
+            <div v-if="filteredPancakes.length === 0" class="empty">
+              Ничего не найдено в “Сладкие блины”.
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- bottom mini cart -->
+    <transition name="slideup">
+      <div v-if="cartCount > 0" class="cartbar" role="region" aria-label="Корзина">
+        <div class="cartbar-left">
+          <div class="cartdot" aria-hidden="true"></div>
+          <div>
+            <div class="cart-title">Вы выбрали: <b>{{ cartCount }}</b></div>
+            <div class="cart-sub">Сумма: <b>{{ cartTotal }}</b> лей</div>
+          </div>
+        </div>
+
+        <div class="cartbar-right">
+          <button class="cartbtn ghost" @click="clearCart">Очистить</button>
+          <button class="cartbtn" @click="openCartModal">
+            Оформить
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- item modal -->
+    <transition name="fade">
+      <div v-if="modalItem" class="modal" @click.self="closeModal">
+        <div class="modal-card">
+          <button class="modal-x" @click="closeModal" aria-label="Закрыть">×</button>
+
+          <div class="modal-grid">
+            <div class="modal-img">
+              <img :src="modalItem.image" :alt="modalItem.title" />
+            </div>
+            <div class="modal-info">
+              <div class="modal-pill">{{ modalItem.categoryLabel }}</div>
+              <h2>{{ modalItem.title }}</h2>
+              <p class="modal-desc">{{ modalItem.descLong ?? modalItem.desc }}</p>
+
+              <div class="modal-row">
+                <div class="modal-price">
+                  <span class="num">{{ modalItem.price }}</span>
+                  <span class="cur">лей</span>
+                </div>
+
+                <button class="want big" @click="addToCart(modalItem)">
+                  Хочу
+                </button>
+              </div>
+
+              <div class="modal-note">
+                * Фото и состав ты легко заменишь — данные в массиве вверху файла.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- cart modal -->
+    <transition name="fade">
+      <div v-if="cartModalOpen" class="modal" @click.self="cartModalOpen = false">
+        <div class="modal-card">
+          <button class="modal-x" @click="cartModalOpen = false" aria-label="Закрыть">×</button>
+          <h2 class="cart-h">Ваш заказ</h2>
+
+          <div v-if="cart.length === 0" class="empty">Корзина пустая.</div>
+
+          <div v-else class="cart-list">
+            <div v-for="c in cart" :key="c.id" class="cart-item">
+              <div class="cart-item-left">
+                <img :src="c.image" :alt="c.title" />
+                <div>
+                  <div class="cart-item-title">{{ c.title }}</div>
+                  <div class="cart-item-sub">{{ c.price }} лей</div>
+                </div>
+              </div>
+
+              <div class="qty">
+                <button class="qbtn" @click="dec(c)">−</button>
+                <div class="qnum">{{ c.qty }}</div>
+                <button class="qbtn" @click="inc(c)">+</button>
+              </div>
+            </div>
+
+            <div class="cart-total">
+              <span>Итого</span>
+              <b>{{ cartTotal }} лей</b>
+            </div>
+
+            <div class="cart-cta">
+              <button class="cartbtn ghost" @click="clearCart">Очистить</button>
+              <button class="cartbtn" @click="fakeCheckout">
+                Подтвердить (демо)
+              </button>
+            </div>
+
+            <div v-if="toast" class="toast">{{ toast }}</div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script setup lang="ts">
+import img10 from '@/assets/image10.png';
+import img11 from '~/assets/image 11.png';
+import img12 from '~/assets/image 12.png';
+import img13 from '~/assets/image 13.png';
+import img14 from '~/assets/image 14.png';
+import img15 from '~/assets/image 15.png';
+
+type Category = 'drinks' | 'pancakes'
+
+type MenuItem = {
+  id: string
+  category: Category
+  categoryLabel: string
+  title: string
+  desc: string
+  descLong?: string
+  price: number
+  image: string
+  badge?: string
+}
+
+const activeTab = ref<'all' | 'drinks' | 'pancakes'>('all')
+const query = ref('')
+
+/**
+ * Меню — поменяешь названия/цены/картинки как хочешь.
+ * Картинки лежат в /public/images/menu/...
+ */
+const items = ref<MenuItem[]>([
+  // Drinks (4 coffee + 1 tea)
+  {
+    id: 'coffee-1',
+    category: 'drinks',
+    categoryLabel: 'Кофе & Чай',
+    title: 'Кофе с мороженым и клубничным сиропом',
+    desc: 'Нежный эспрессо, холодное мороженое и сладкий клубничный акцент.',
+    descLong: 'Фирменный холодный кофе с мягкой сливочностью. Идеально, когда хочется сладкого и бодрого сразу.',
+    price: 260,
+    image: '@/assets/image10.png',
+    badge: 'хит',
+  },
+  {
+    id: 'coffee-2',
+    category: 'drinks',
+    categoryLabel: 'Кофе & Чай',
+    title: 'Фисташковый латте с малиной',
+    desc: 'Сливочный латте с фисташками и лёгким малиновым клинком.',
+    price: 280,
+    image: '/images/menu/coffee-2.png',
+  },
+  {
+    id: 'coffee-3',
+    category: 'drinks',
+    categoryLabel: 'Кофе & Чай',
+    title: 'Кофе “Мохито”',
+    desc: 'Освежающий кофейный твист с лаймом и мятной ноткой.',
+    price: 270,
+    image: '/images/menu/coffee-3.png',
+    badge: 'новинка',
+  },
+  {
+    id: 'coffee-4',
+    category: 'drinks',
+    categoryLabel: 'Кофе & Чай',
+    title: 'Карамельный айс-латте',
+    desc: 'Лёд, молоко, эспрессо и карамель — мягко и сладко.',
+    price: 265,
+    image: '/images/menu/coffee-4.png',
+  },
+  {
+    id: 'tea-1',
+    category: 'drinks',
+    categoryLabel: 'Кофе & Чай',
+    title: 'Чай с ягодами и мёдом',
+    desc: 'Тёплый, ароматный, с ягодной кислинкой и мёдовой нежностью.',
+    price: 140,
+    image: '/images/menu/tea-1.png',
+  },
+
+  // Pancakes (3)
+  {
+    id: 'pancake-1',
+    category: 'pancakes',
+    categoryLabel: 'Сладкие блины',
+    title: 'Блин с нутеллой и бананом',
+    desc: 'Тёплый блин, нутелла и спелый банан — уют в каждом кусочке.',
+    price: 240,
+    image: '/images/menu/pancake-1.png',
+    badge: 'топ',
+  },
+  {
+    id: 'pancake-2',
+    category: 'pancakes',
+    categoryLabel: 'Сладкие блины',
+    title: 'Блин с малиной и сливочным кремом',
+    desc: 'Лёгкая кислинка малины и нежный крем.',
+    price: 250,
+    image: '/images/menu/pancake-2.png',
+  },
+  {
+    id: 'pancake-3',
+    category: 'pancakes',
+    categoryLabel: 'Сладкие блины',
+    title: 'Блин “Сникерс”',
+    desc: 'Шоколад, арахис и карамель — мощно и вкусно.',
+    price: 255,
+    image: '/images/menu/pancake-3.png',
+    badge: 'сладко!',
+  },
+])
+
+const normalizedQuery = computed(() => query.value.toLowerCase())
+
+const filtered = computed(() => {
+  const q = normalizedQuery.value
+  const byQuery = (it: MenuItem) =>
+    !q ||
+    it.title.toLowerCase().includes(q) ||
+    it.desc.toLowerCase().includes(q)
+
+  const byTab = (it: MenuItem) => {
+    if (activeTab.value === 'all') return true
+    return it.category === activeTab.value
+  }
+
+  return items.value.filter((it) => byTab(it) && byQuery(it))
+})
+
+const filteredDrinks = computed(() => filtered.value.filter((i) => i.category === 'drinks'))
+const filteredPancakes = computed(() => filtered.value.filter((i) => i.category === 'pancakes'))
+
+const showDrinks = computed(() => activeTab.value === 'all' || activeTab.value === 'drinks')
+const showPancakes = computed(() => activeTab.value === 'all' || activeTab.value === 'pancakes')
+
+/** Tilt effect */
+function onTilt(e: MouseEvent) {
+  const card = e.currentTarget as HTMLElement
+  const rect = card.getBoundingClientRect()
+  const x = (e.clientX - rect.left) / rect.width
+  const y = (e.clientY - rect.top) / rect.height
+
+  const rotateY = (x - 0.5) * 10
+  const rotateX = (0.5 - y) * 10
+
+  card.style.setProperty('--rx', `${rotateX}deg`)
+  card.style.setProperty('--ry', `${rotateY}deg`)
+  card.style.setProperty('--glx', `${x * 100}%`)
+  card.style.setProperty('--gly', `${y * 100}%`)
+}
+
+function resetTilt(e: MouseEvent) {
+  const card = e.currentTarget as HTMLElement
+  card.style.setProperty('--rx', `0deg`)
+  card.style.setProperty('--ry', `0deg`)
+}
+
+/** Modal */
+const modalItem = ref<MenuItem | null>(null)
+function openModal(item: MenuItem) {
+  modalItem.value = item
+}
+function closeModal() {
+  modalItem.value = null
+}
+
+/** Cart (mini) */
+type CartLine = MenuItem & { qty: number }
+const cart = ref<CartLine[]>([])
+const cartModalOpen = ref(false)
+const toast = ref('')
+
+function addToCart(item: MenuItem) {
+  const found = cart.value.find((c) => c.id === item.id)
+  if (found) found.qty += 1
+  else cart.value.push({ ...item, qty: 1 })
+}
+
+function inc(line: CartLine) {
+  const found = cart.value.find((c) => c.id === line.id)
+  if (found) found.qty += 1
+}
+function dec(line: CartLine) {
+  const found = cart.value.find((c) => c.id === line.id)
+  if (!found) return
+  found.qty -= 1
+  if (found.qty <= 0) cart.value = cart.value.filter((c) => c.id !== line.id)
+}
+
+const cartCount = computed(() => cart.value.reduce((sum, c) => sum + c.qty, 0))
+const cartTotal = computed(() => cart.value.reduce((sum, c) => sum + c.qty * c.price, 0))
+
+function clearCart() {
+  cart.value = []
+  cartModalOpen.value = false
+}
+
+function openCartModal() {
+  cartModalOpen.value = true
+  toast.value = ''
+}
+
+function fakeCheckout() {
+  toast.value = 'Демо: тут подключишь Telegram/WhatsApp/форму заказа 🙂'
+  setTimeout(() => (toast.value = ''), 2500)
+}
+</script>
+
+<style scoped>
+.menu-page{
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 420px at 20% 0%, rgba(255, 210, 220, .55), transparent 60%),
+    radial-gradient(900px 520px at 90% 20%, rgba(230, 215, 255, .35), transparent 60%),
+    linear-gradient(180deg, #fbf7f6 0%, #ffffff 70%);
+  color: #1e1b1b;
+  position: relative;
+  overflow-x: clip;
+}
+
+.glow{
+  position: absolute;
+  inset: -200px -200px auto -200px;
+  height: 380px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 173, 190, .35), transparent 55%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.container{
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 34px 18px 110px;
+}
+
+.title-wrap{
+  padding: 14px 6px 22px;
+}
+
+.pill{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: .2px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(140, 70, 70, .12);
+  box-shadow: 0 10px 24px rgba(30, 10, 10, .06);
+  color: #7b3e3e;
+}
+
+h1{
+  margin: 14px 0 8px;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.8px;
+}
+h1 span{ color: #9a4d4d; }
+
+.sub{
+  margin: 0;
+  color: rgba(20, 10, 10, .65);
+  font-size: 15px;
+}
+
+.toolbar{
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.tabs{
+  display: inline-flex;
+  gap: 8px;
+  padding: 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid rgba(140, 70, 70, .12);
+  box-shadow: 0 10px 24px rgba(30, 10, 10, .06);
+}
+
+.tab{
+  border: 0;
+  background: transparent;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  color: rgba(30, 10, 10, .65);
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, color .12s ease;
+}
+.tab:hover{ transform: translateY(-1px); }
+.tab.active{
+  background: rgba(154, 77, 77, .12);
+  color: #7b3e3e;
+}
+
+.search{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: min(440px, 100%);
+  flex: 1;
+  max-width: 520px;
+  padding: 10px 12px 10px 34px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid rgba(140, 70, 70, .12);
+  box-shadow: 0 10px 24px rgba(30, 10, 10, .06);
+}
+
+.search-ic{
+  position: absolute;
+  left: 12px;
+  opacity: .6;
+  font-size: 14px;
+}
+
+.search input{
+  border: 0;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  color: rgba(25, 10, 10, .85);
+}
+
+.clear{
+  border: 0;
+  cursor: pointer;
+  background: rgba(154, 77, 77, .12);
+  color: #7b3e3e;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-top: 10px;
+}
+@media (max-width: 980px){
+  .grid{ grid-template-columns: 1fr; }
+  h1{ font-size: 36px; }
+}
+
+.col{
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(140, 70, 70, .12);
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(30, 10, 10, .07);
+  padding: 14px;
+}
+
+.section-head{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 8px 12px;
+}
+.section-title{
+  font-weight: 900;
+  font-size: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.section-title span{ color: #2a1b1b; }
+.section-hint{
+  font-size: 12px;
+  color: rgba(25, 10, 10, .55);
+}
+
+.cards{
+  display: grid;
+  gap: 12px;
+}
+
+.card{
+  --rx: 0deg;
+  --ry: 0deg;
+  --glx: 50%;
+  --gly: 30%;
+  border-radius: 18px;
+  background:
+    radial-gradient(220px 140px at var(--glx) var(--gly), rgba(255, 180, 198, .20), transparent 60%),
+    rgba(255,255,255,.75);
+  border: 1px solid rgba(140, 70, 70, .12);
+  box-shadow: 0 14px 28px rgba(30, 10, 10, .06);
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover{
+  box-shadow: 0 22px 46px rgba(30, 10, 10, .10);
+}
+
+.card-inner{
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 12px;
+  padding: 14px;
+  align-items: center;
+}
+@media (max-width: 520px){
+  .card-inner{ grid-template-columns: 1fr; }
+}
+
+.card-text h3{
+  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.card-text p{
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: rgba(25, 10, 10, .62);
+  line-height: 1.4;
+}
+
+.card-media{
+  display: flex;
+  justify-content: flex-end;
+}
+.card-media img{
+  width: 170px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 16px rgba(20, 0, 0, .12));
+}
+
+.card-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.want{
+  border: 0;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  color: #fff;
+  background: linear-gradient(180deg, #b15b5b 0%, #944747 100%);
+  box-shadow: 0 14px 24px rgba(177, 91, 91, .22);
+  transition: transform .12s ease;
+}
+.want:hover{ transform: translateY(-1px); }
+.want.big{ padding: 12px 16px; font-size: 13px; }
+
+.price{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-weight: 900;
+  color: #7b3e3e;
+}
+.price .num{ font-size: 14px; }
+.price .cur{ font-size: 12px; opacity: .9; }
+
+.more{
+  border: 1px solid rgba(140, 70, 70, .18);
+  background: rgba(255,255,255,.7);
+  cursor: pointer;
+  padding: 9px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  color: rgba(25, 10, 10, .72);
+}
+.more:hover{
+  background: rgba(154, 77, 77, .10);
+  color: #7b3e3e;
+}
+
+.card-badge{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 210, 220, .8);
+  border: 1px solid rgba(140, 70, 70, .12);
+  color: #7b3e3e;
+}
+
+.empty{
+  padding: 14px 10px;
+  color: rgba(25, 10, 10, .55);
+  font-size: 13px;
+}
+
+/* cartbar */
+.cartbar{
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  max-width: 1120px;
+  margin: 0 auto;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.86);
+  border: 1px solid rgba(140, 70, 70, .14);
+  box-shadow: 0 24px 60px rgba(30, 10, 10, .14);
+  backdrop-filter: blur(10px);
+}
+
+.cartbar-left{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cartdot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #b15b5b;
+  box-shadow: 0 0 0 6px rgba(177, 91, 91, .14);
+}
+.cart-title{ font-size: 13px; }
+.cart-sub{ font-size: 12px; color: rgba(25, 10, 10, .65); }
+
+.cartbar-right{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cartbtn{
+  border: 0;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  color: #fff;
+  background: linear-gradient(180deg, #b15b5b 0%, #944747 100%);
+  box-shadow: 0 14px 24px rgba(177, 91, 91, .22);
+}
+.cartbtn.ghost{
+  background: rgba(255,255,255,.7);
+  color: #7b3e3e;
+  border: 1px solid rgba(140, 70, 70, .18);
+  box-shadow: none;
+}
+
+/* modal */
+.modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 8, 8, .45);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  z-index: 50;
+}
+
+.modal-card{
+  width: min(880px, 100%);
+  background: rgba(255,255,255,.92);
+  border-radius: 22px;
+  border: 1px solid rgba(140, 70, 70, .14);
+  box-shadow: 0 40px 100px rgba(0,0,0,.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-x{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 70, 70, .18);
+  background: rgba(255,255,255,.75);
+  cursor: pointer;
+  font-size: 20px;
+  color: rgba(25, 10, 10, .75);
+}
+
+.modal-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 16px;
+}
+@media (max-width: 860px){
+  .modal-grid{ grid-template-columns: 1fr; }
+}
+
+.modal-img{
+  border-radius: 18px;
+  background:
+    radial-gradient(420px 220px at 20% 20%, rgba(255, 180, 198, .25), transparent 60%),
+    rgba(250, 248, 248, .9);
+  border: 1px solid rgba(140, 70, 70, .12);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  min-height: 260px;
+}
+.modal-img img{
+  width: 100%;
+  max-width: 360px;
+  height: 240px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 22px rgba(20, 0, 0, .14));
+}
+
+.modal-info{
+  padding: 8px 6px 14px;
+}
+.modal-pill{
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(154, 77, 77, .10);
+  color: #7b3e3e;
+  border: 1px solid rgba(140, 70, 70, .12);
+}
+.modal-info h2{
+  margin: 10px 0 8px;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.modal-desc{
+  margin: 0 0 14px;
+  color: rgba(25, 10, 10, .65);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.modal-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.modal-price{
+  font-weight: 900;
+  color: #7b3e3e;
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.modal-price .num{ font-size: 20px; }
+.modal-price .cur{ font-size: 13px; opacity: .9; }
+
+.modal-note{
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(25, 10, 10, .55);
+}
+
+/* cart modal */
+.cart-h{
+  margin: 16px 16px 6px;
+  font-size: 22px;
+}
+.cart-list{
+  padding: 0 16px 16px;
+}
+.cart-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(140, 70, 70, .12);
+}
+.cart-item-left{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.cart-item-left img{
+  width: 56px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid rgba(140, 70, 70, .12);
+}
+.cart-item-title{
+  font-weight: 900;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+.cart-item-sub{
+  font-size: 12px;
+  color: rgba(25, 10, 10, .62);
+}
+.qty{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.qbtn{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 70, 70, .18);
+  background: rgba(255,255,255,.7);
+  cursor: pointer;
+  font-size: 18px;
+  color: rgba(25, 10, 10, .75);
+}
+.qnum{
+  min-width: 26px;
+  text-align: center;
+  font-weight: 900;
+  color: #7b3e3e;
+}
+.cart-total{
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0 10px;
+  font-size: 14px;
+}
+.cart-cta{
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.toast{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(154, 77, 77, .10);
+  border: 1px solid rgba(140, 70, 70, .12);
+  color: #7b3e3e;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+
+.fade-enter-active, .fade-leave-active{ transition: opacity .18s ease; }
+.fade-enter-from, .fade-leave-to{ opacity: 0; }
+
+.slideup-enter-active, .slideup-leave-active{ transition: transform .18s ease, opacity .18s ease; }
+.slideup-enter-from, .slideup-leave-to{ transform: translateY(18px); opacity: 0; }
+</style>
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+<template>
+  <div class="page" @pointermove="onPointerMove" @pointerleave="onPointerLeave">
+    <!-- BACKGROUND -->
+    <div class="bg" aria-hidden="true">
+      <div class="bg__warm" />
+      <div class="bg__grain" />
+      <div class="bg__blob bg__blob--1" />
+      <div class="bg__blob bg__blob--2" />
+      <div class="bg__sparkles" />
+    </div>
+
+    <!-- FLOATING NAV -->
+    <div class="floatNav">
+      <button
+        class="chip"
+        :class="{ 'chip--active': activeSection === 'coffee' }"
+        @click="scrollTo('coffee')"
+      >
+        ☕ Кофе
+      </button>
+      <button
+        class="chip"
+        :class="{ 'chip--active': activeSection === 'drinks' }"
+        @click="scrollTo('drinks')"
+      >
+        🍋 Напитки
+      </button>
+      <button
+        class="chip"
+        :class="{ 'chip--active': activeSection === 'crepes' }"
+        @click="scrollTo('crepes')"
+      >
+        🥞 Блинчики
+      </button>
+
+      <div class="chip chip--ghost" title="Избранное">
+        ❤️ <span class="chip__count">{{ favorites.size }}</span>
+      </div>
+    </div>
+
+    <main class="wrap">
+      <!-- HEADER -->
+      <section class="head reveal">
+        <div class="head__badge">☕ Меню — For-L∞ve</div>
+
+        <h1 class="head__title">
+          Выбирай вкус <span class="dot">с любовью.</span>
+        </h1>
+
+        <p class="head__text">
+          Слева — кофе и напитки, справа — блинчики. Всё свежее и вкусное ✨
+        </p>
+
+        <div class="head__controls">
+          <label class="search">
+            <span class="search__icon">⌕</span>
+            <input
+              v-model.trim="q"
+              class="search__input"
+              type="search"
+              placeholder="Поиск по меню… (например: pistachio)"
+              aria-label="Поиск"
+            />
+            <button v-if="q" class="search__clear" @click="q = ''" aria-label="Очистить">
+              ×
+            </button>
+          </label>
+
+          <div class="tags">
+            <button class="tag" :class="{ 'tag--active': activeTag === 'all' }" @click="activeTag = 'all'">
+              Все
+            </button>
+            <button
+              v-for="t in allTags"
+              :key="t"
+              class="tag"
+              :class="{ 'tag--active': activeTag === t }"
+              @click="activeTag = t"
+            >
+              {{ t }}
+            </button>
+          </div>
+        </div>
+
+        <div class="head__actions">
+          <NuxtLink class="btn btn--primary" to="/booking">
+            Забронировать столик
+          </NuxtLink>
+          <NuxtLink class="btn btn--ghost" to="/contacts">Контакты</NuxtLink>
+        </div>
+      </section>
+
+      <!-- GRID -->
+      <section class="menuGrid">
+        <!-- LEFT -->
+        <article class="card reveal">
+          <div class="card__head">
+            <h2 class="card__title">Кофе & напитки</h2>
+            <p class="card__subtitle">Сиропы, мороженое, настроение — выбирай своё.</p>
+          </div>
+
+          <!-- COFFEE -->
+          <div id="coffee" class="group">
+            <div class="group__top">
+              <div class="group__badge">For-L∞ve coffee</div>
+              <div class="group__title">Кофе</div>
+              <div class="group__hint">нажимай на карточки ✨</div>
+            </div>
+
+            <div class="items">
+              <button
+                v-for="p in filteredCoffee"
+                :key="p.title"
+                class="item tilt"
+                type="button"
+                @pointermove="tiltMove"
+                @pointerleave="tiltLeave"
+                @click="openModal(p)"
+              >
+                <div class="item__imgWrap">
+                  <img class="item__img" :src="imgSrc(p.img)" :alt="p.title" loading="lazy" />
+                  <div class="shine" />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }}</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill">{{ p.tag }}</span>
+
+                    <button
+                      class="fav"
+                      type="button"
+                      :aria-label="favorites.has(p.title) ? 'Убрать из избранного' : 'В избранное'"
+                      :class="{ 'fav--on': favorites.has(p.title) }"
+                      @click.stop="toggleFav(p.title)"
+                    >
+                      <span class="fav__heart">♥</span>
+                      <span class="fav__burst" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- DRINKS -->
+          <div id="drinks" class="group">
+            <div class="group__top">
+              <div class="group__badge group__badge--soft">For-L∞ve drinks</div>
+              <div class="group__title">Чай / напитки</div>
+              <div class="group__hint">попробуй “лёд” в модалке 🧊</div>
+            </div>
+
+            <div class="items">
+              <button
+                v-for="p in filteredDrinks"
+                :key="p.title"
+                class="item tilt"
+                type="button"
+                @pointermove="tiltMove"
+                @pointerleave="tiltLeave"
+                @click="openModal(p)"
+              >
+                <div class="item__imgWrap">
+                  <img class="item__img" :src="imgSrc(p.img)" :alt="p.title" loading="lazy" />
+                  <div class="shine" />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }}</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill pill--green">{{ p.tag }}</span>
+                    <span class="mini">лёд</span>
+                    <span class="mini">цитрус</span>
+
+                    <button
+                      class="fav"
+                      type="button"
+                      :aria-label="favorites.has(p.title) ? 'Убрать из избранного' : 'В избранное'"
+                      :class="{ 'fav--on': favorites.has(p.title) }"
+                      @click.stop="toggleFav(p.title)"
+                    >
+                      <span class="fav__heart">♥</span>
+                      <span class="fav__burst" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- RIGHT -->
+        <aside class="card card--accent right reveal">
+          <div class="card__head">
+            <h2 class="card__title">Блинчики</h2>
+            <p class="card__subtitle">Сладкие, нежные — идеальны к кофе.</p>
+          </div>
+
+          <div id="crepes" class="items items--single">
+            <button
+              v-for="p in filteredCrepes"
+              :key="p.title"
+              class="item item--big tilt"
+              type="button"
+              @pointermove="tiltMove"
+              @pointerleave="tiltLeave"
+              @click="openModal(p)"
+            >
+              <div class="item__imgWrap item__imgWrap--big">
+                <img class="item__img" :src="imgSrc(p.img)" :alt="p.title" loading="lazy" />
+                <div class="shine" />
+              </div>
+
+              <div class="item__body">
+                <div class="item__row">
+                  <div class="item__name">{{ p.title }}</div>
+                  <div class="item__price">{{ p.price }}</div>
+                </div>
+
+                <div class="item__desc">{{ p.desc }}</div>
+
+                <div class="item__meta">
+                  <span class="pill">{{ p.tag }}</span>
+                  <span class="mini">добавки</span>
+                  <span class="mini">шоколад</span>
+
+                  <button
+                    class="fav"
+                    type="button"
+                    :aria-label="favorites.has(p.title) ? 'Убрать из избранного' : 'В избранное'"
+                    :class="{ 'fav--on': favorites.has(p.title) }"
+                    @click.stop="toggleFav(p.title)"
+                  >
+                    <span class="fav__heart">♥</span>
+                    <span class="fav__burst" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <div class="cta">
+            <div class="ctaLeft">
+              <div class="ctaTitle">Хочешь помочь выбрать?</div>
+              <div class="ctaText">Нажми “настроить” — покажем вкус и добавки.</div>
+            </div>
+
+            <NuxtLink class="btn btn--primary" to="/contacts">Написать</NuxtLink>
+          </div>
+        </aside>
+      </section>
+
+      <!-- LITTLE FOOT NOTE -->
+      <p class="note reveal">
+        Подсказка: на ПК — двигай мышкой по карточкам (наклон + блик), на телефоне — просто тапай и листай ✨
+      </p>
+    </main>
+
+    <!-- MODAL -->
+    <Teleport to="body">
+      <div
+        v-if="modalOpen"
+        class="modalOverlay"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="selected?.title || 'Детали'"
+        @click.self="closeModal"
+        @keydown.esc="closeModal"
+      >
+        <div class="modal">
+          <button class="modal__close" @click="closeModal" aria-label="Закрыть">×</button>
+
+          <div class="modal__grid">
+            <div class="modal__media">
+              <img v-if="selected" class="modal__img" :src="imgSrc(selected.img)" :alt="selected.title" />
+              <div class="modal__glow" aria-hidden="true" />
+            </div>
+
+            <div class="modal__body">
+              <div class="modal__top">
+                <div class="modal__title">{{ selected?.title }}</div>
+                <div class="modal__price">{{ selected?.price }}</div>
+              </div>
+
+              <div class="modal__desc">{{ selected?.desc }}</div>
+
+              <div class="modal__pills">
+                <span class="pill">{{ selected?.tag }}</span>
+                <span v-if="favorites.has(selected?.title || '')" class="pill pill--hot">в избранном</span>
+              </div>
+
+              <div class="builder">
+                <div class="builder__title">Настроить под себя</div>
+
+                <div class="builder__row">
+                  <span class="builder__label">Лёд</span>
+                  <button class="switch" :class="{ 'switch--on': opts.ice }" @click="opts.ice = !opts.ice">
+                    <span class="switch__dot" />
+                  </button>
+                </div>
+
+                <div class="builder__row">
+                  <span class="builder__label">Сироп</span>
+                  <div class="seg">
+                    <button
+                      v-for="s in syrups"
+                      :key="s"
+                      class="seg__btn"
+                      :class="{ 'seg__btn--on': opts.syrup === s }"
+                      @click="opts.syrup = s"
+                    >
+                      {{ s }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="builder__row">
+                  <span class="builder__label">Сладость</span>
+                  <input
+                    v-model.number="opts.sweet"
+                    class="range"
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="1"
+                  />
+                  <span class="builder__value">{{ sweetLabel(opts.sweet) }}</span>
+                </div>
+
+                <div class="builder__summary">
+                  <div class="builder__line">
+                    <span>Твой вариант:</span>
+                    <strong>
+                      {{ selected?.title }}
+                      <span v-if="opts.ice"> · 🧊</span>
+                      <span v-if="opts.syrup !== 'без'"> · сироп: {{ opts.syrup }}</span>
+                      <span> · {{ sweetLabel(opts.sweet) }}</span>
+                    </strong>
+                  </div>
+
+                  <div class="builder__actions">
+                    <button class="btn btn--primary" @click="quickMessage">
+                      Написать нам этот вариант
+                    </button>
+                    <button class="btn btn--ghost" @click="toggleFav(selected?.title || '')">
+                      {{ favorites.has(selected?.title || '') ? 'Убрать из избранного' : 'В избранное' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal__hint">
+                Нравится эффект? — можно добавить ещё “вау” (звук, микро-переходы, анимации на скролле)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+  </div>
+</template>
+
+<script setup lang="ts">
+type Product = {
+  title: string
+  desc: string
+  price: string
+  img: string
+  tag: string
+}
+
+useHead({
+  title: "Меню — For Love Coffee",
+  meta: [{ name: "description", content: "Меню For Love Coffee: кофе, чай и сладкие блинчики." }],
+})
+
+// ✅ public/ — достаточно /filename.png
+const coffee: Product[] = [
+  { title: "Raspberry Ice Coffee", desc: "Холодный кофе с мороженым и малиновым акцентом.", price: "59 MDL", img: "image-10.png", tag: "sweet" },
+  { title: "Pistachio Ice Coffee", desc: "Нежный вкус фисташки + малина.", price: "59 MDL", img: "image-11.png", tag: "nutty" },
+  { title: "Oreo Ice Coffee", desc: "Кремовая текстура и крошка печенья Oreo.", price: "59 MDL", img: "image-12.png", tag: "creamy" },
+  { title: "Bounty Ice Coffee", desc: "Шоколадный топпинг и кокосовое настроение.", price: "59 MDL", img: "image-13.png", tag: "choco" },
+]
+
+const drinks: Product[] = [
+  { title: "For-L∞ve Tea (Lemon)", desc: "Освежающий чай со льдом, лимоном и мятой.", price: "39 MDL", img: "image-15.png", tag: "fresh" },
+  { title: "Mojito (Non-Alcohol)", desc: "Лайм, мята, лёд — бодрит и освежает.", price: "45 MDL", img: "image-14.png", tag: "cool" },
+]
+
+const crepes: Product[] = [
+  { title: "Crepe Strawberry", desc: "Клубника, крем и сахарная пудра — нежно и ярко.", price: "65 MDL", img: "image-16.png", tag: "berry" },
+  { title: "Crepe Banana & Choco", desc: "Банан + шоколад, идеальная пара к кофе.", price: "65 MDL", img: "image-17.png", tag: "classic" },
+  { title: "Crepe Nutella & Coconut", desc: "Шоколадная паста, кокос и орехи — сладкий топ.", price: "69 MDL", img: "image-18.png", tag: "top" },
+]
+
+// ------- Search / Filter -------
+const q = ref("")
+const activeTag = ref<"all" | string>("all")
+
+const allTags = computed(() => {
+  const set = new Set<string>()
+  ;[...coffee, ...drinks, ...crepes].forEach((p) => set.add(p.tag))
+  return Array.from(set).sort((a, b) => a.localeCompare(b))
+})
+
+function matches(p: Product) {
+  const query = q.value.toLowerCase()
+  const okQuery = !query || `${p.title} ${p.desc} ${p.tag}`.toLowerCase().includes(query)
+  const okTag = activeTag.value === "all" || p.tag === activeTag.value
+  return okQuery && okTag
+}
+
+const filteredCoffee = computed(() => coffee.filter(matches))
+const filteredDrinks = computed(() => drinks.filter(matches))
+const filteredCrepes = computed(() => crepes.filter(matches))
+
+// ------- Favorites -------
+const favorites = ref<Set<string>>(new Set())
+function toggleFav(title: string) {
+  if (!title) return
+  const next = new Set(favorites.value)
+  if (next.has(title)) next.delete(title)
+  else next.add(title)
+  favorites.value = next
+}
+
+// ------- Modal -------
+const modalOpen = ref(false)
+const selected = ref<Product | null>(null)
+
+const syrups = ["без", "ваниль", "карамель", "кокос", "малина"] as const
+const opts = reactive({ ice: true, syrup: "без" as (typeof syrups)[number], sweet: 2 })
+
+function openModal(p: Product) {
+  selected.value = p
+  modalOpen.value = true
+  opts.ice = true
+  opts.syrup = "без"
+  opts.sweet = 2
+  // lock scroll
+  document.documentElement.style.overflow = "hidden"
+}
+function closeModal() {
+  modalOpen.value = false
+  selected.value = null
+  document.documentElement.style.overflow = ""
+}
+function sweetLabel(v: number) {
+  return v === 0 ? "без сахара" : v === 1 ? "лайт" : v === 2 ? "норм" : "сладко"
+}
+function quickMessage() {
+  // Просто удобная заготовка текста — отправка через /contacts
+  const p = selected.value
+  if (!p) return
+  const text =
+    `Привет! Хочу: ${p.title}` +
+    (opts.ice ? " · лёд" : "") +
+    (opts.syrup !== "без" ? ` · сироп: ${opts.syrup}` : "") +
+    ` · сладость: ${sweetLabel(opts.sweet)}`
+  // копируем в буфер — без сторонних библиотек
+  navigator.clipboard?.writeText(text).catch(() => {})
+  // лёгкий хинт: открываем контакты
+  navigateTo("/contacts")
+}
+
+// ------- Scroll highlight (coffee/drinks/crepes) -------
+const activeSection = ref<"coffee" | "drinks" | "crepes">("coffee")
+
+function scrollTo(id: string) {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+// ------- Background pointer parallax -------
+function setRootVar(name: string, value: string) {
+  document.documentElement.style.setProperty(name, value)
+}
+function onPointerMove(e: PointerEvent) {
+  const w = window.innerWidth || 1
+  const h = window.innerHeight || 1
+  const x = (e.clientX / w - 0.5) * 2 // -1..1
+  const y = (e.clientY / h - 0.5) * 2 // -1..1
+  setRootVar("--mx", x.toFixed(4))
+  setRootVar("--my", y.toFixed(4))
+}
+function onPointerLeave() {
+  setRootVar("--mx", "0")
+  setRootVar("--my", "0")
+}
+
+// ------- Tilt cards (pointer-based) -------
+function tiltMove(e: PointerEvent) {
+  const el = e.currentTarget as HTMLElement | null
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  const px = (e.clientX - r.left) / Math.max(1, r.width)
+  const py = (e.clientY - r.top) / Math.max(1, r.height)
+  el.style.setProperty("--px", String(px))
+  el.style.setProperty("--py", String(py))
+  el.style.setProperty("--tilt", "1")
+}
+function tiltLeave(e: PointerEvent) {
+  const el = e.currentTarget as HTMLElement | null
+  if (!el) return
+  el.style.setProperty("--tilt", "0")
+}
+
+// ------- Reveal on scroll -------
+onMounted(() => {
+  // section observer
+  const sectionIds = ["coffee", "drinks", "crepes"] as const
+  const secEls = sectionIds.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
+  const secObs = new IntersectionObserver(
+    (entries) => {
+      const visible = entries.filter((x) => x.isIntersecting).sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0]
+      if (!visible?.target?.id) return
+      activeSection.value = visible.target.id as any
+    },
+    { root: null, threshold: [0.25, 0.4, 0.6] }
+  )
+  secEls.forEach((el) => secObs.observe(el))
+
+  // reveal observer
+  const revealEls = Array.from(document.querySelectorAll<HTMLElement>(".reveal"))
+  const revObs = new IntersectionObserver(
+    (entries) => {
+      for (const it of entries) {
+        if (it.isIntersecting) (it.target as HTMLElement).classList.add("is-visible")
+      }
+    },
+    { threshold: 0.15 }
+  )
+  revealEls.forEach((el) => revObs.observe(el))
+})
+
+// helpers
+function imgSrc(s: string) {
+  // если уже начинается с / — оставляем
+  return s.startsWith("/") ? s : `/${s}`
+}
+</script>
+
+<style scoped>
+/* -------------------------
+   Base + Background magic
+-------------------------- */
+.page {
+  --mx: 0;
+  --my: 0;
+  min-height: 100vh;
+  padding: 90px 18px 64px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #241b18;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.bg__warm {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1100px 700px at 20% 10%, rgba(255, 228, 214, 0.9), transparent 60%),
+    radial-gradient(900px 600px at 85% 30%, rgba(255, 214, 196, 0.65), transparent 60%),
+    radial-gradient(900px 900px at 45% 100%, rgba(214, 170, 150, 0.35), transparent 60%),
+    linear-gradient(180deg, #fff 0%, #fbf5f1 45%, #f5ede8 100%);
+}
+
+.bg__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.bg__sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,.9), transparent 55%),
+    radial-gradient(2px 2px at 30% 70%, rgba(255,255,255,.8), transparent 55%),
+    radial-gradient(2px 2px at 75% 35%, rgba(255,255,255,.75), transparent 55%),
+    radial-gradient(2px 2px at 85% 80%, rgba(255,255,255,.85), transparent 55%),
+    radial-gradient(2px 2px at 55% 15%, rgba(255,255,255,.75), transparent 55%);
+  opacity: .55;
+  filter: blur(.1px);
+  animation: twinkle 6s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,100% { transform: translate3d(0,0,0); opacity:.45; }
+  50% { transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 10px), 0); opacity:.75; }
+}
+
+.bg__blob {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  filter: blur(40px);
+  opacity: 0.35;
+  border-radius: 999px;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.bg__blob--1 {
+  left: -140px;
+  top: 120px;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 88, 52, 0.55), transparent 60%);
+  animation: floaty 12s ease-in-out infinite;
+  transform: translate3d(calc(var(--mx) * 24px), calc(var(--my) * 18px), 0);
+}
+
+.bg__blob--2 {
+  right: -180px;
+  bottom: -140px;
+  background: radial-gradient(circle at 30% 30%, rgba(130, 70, 55, 0.55), transparent 60%);
+  animation: floaty 14s ease-in-out infinite reverse;
+  transform: translate3d(calc(var(--mx) * -22px), calc(var(--my) * -16px), 0);
+}
+
+@keyframes floaty {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(22px, -18px) scale(1.03); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* -------------------------
+   Layout
+-------------------------- */
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.menuGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 14px;
+}
+
+.note {
+  margin: 18px 6px 0;
+  opacity: .75;
+  font-weight: 700;
+}
+
+/* -------------------------
+   Floating nav chips
+-------------------------- */
+.floatNav {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+  padding: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.chip {
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255,255,255,.55);
+  padding: 10px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+  user-select: none;
+}
+.chip:hover { transform: translateY(-1px); }
+.chip--active {
+  background: rgba(178, 74, 74, 0.13);
+  border-color: rgba(178, 74, 74, 0.22);
+}
+.chip--ghost { cursor: default; }
+.chip__count { font-variant-numeric: tabular-nums; }
+
+/* -------------------------
+   Header
+-------------------------- */
+.head {
+  border-radius: 26px;
+  padding: 26px 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1), 0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  backdrop-filter: blur(10px);
+}
+
+.head__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 800;
+  color: #7a3b2b;
+  font-size: 13px;
+}
+
+.head__title {
+  margin: 14px 0 6px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  color: rgba(233, 68, 68, 0.95);
+  text-shadow: 0 10px 25px rgba(196, 88, 52, 0.25);
+}
+
+.head__text {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0.88;
+}
+
+.head__actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.head__controls {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+/* search */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 16px;
+  padding: 12px 12px;
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  background: rgba(255,255,255,.62);
+  box-shadow: 0 12px 30px rgba(32,18,14,.06);
+}
+.search__icon { font-weight: 900; opacity:.8; }
+.search__input {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  font-weight: 800;
+}
+.search__clear{
+  border: none;
+  background: rgba(0,0,0,.06);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+/* tags */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag {
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255,255,255,.55);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 1000;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.tag:hover { transform: translateY(-1px); }
+.tag--active {
+  background: rgba(178, 74, 74, 0.13);
+  border-color: rgba(178, 74, 74, 0.25);
+}
+
+/* -------------------------
+   Cards
+-------------------------- */
+.card {
+  border-radius: 26px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.card--accent {
+  background: radial-gradient(900px 500px at 30% 10%, rgba(196, 88, 52, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.62);
+}
+
+.card__head { margin-bottom: 14px; }
+.card__title { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+.card__subtitle { margin: 6px 0 0; opacity: 0.78; line-height: 1.5; }
+.right { align-self: start; }
+
+/* -------------------------
+   Groups + Items
+-------------------------- */
+.group { margin-top: 14px; }
+.group__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.group__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 900;
+  font-size: 12px;
+  color: #7a3b2b;
+}
+.group__badge--soft {
+  background: rgba(178, 74, 74, 0.1);
+  border-color: rgba(178, 74, 74, 0.18);
+  color: #7c2f2f;
+}
+.group__title { font-weight: 1000; letter-spacing: -0.01em; }
+.group__hint { opacity: .75; font-weight: 900; font-size: 12px; }
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.items--single { grid-template-columns: 1fr; }
+
+.item {
+  text-align: left;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  position: relative;
+  will-change: transform;
+}
+
+/* tilt */
+.tilt {
+  --px: 0.5;
+  --py: 0.5;
+  --tilt: 0;
+}
+.tilt:hover {
+  box-shadow: 0 22px 60px rgba(32,18,14,.12);
+}
+.tilt:where(:hover, :focus-visible) {
+  transform:
+    translateY(-2px)
+    perspective(900px)
+    rotateX(calc((0.5 - var(--py)) * 10deg * var(--tilt)))
+    rotateY(calc((var(--px) - 0.5) * 12deg * var(--tilt)));
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(196, 88, 52, 0.22);
+}
+
+.item__imgWrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: rgba(255, 255, 255, 0.55);
+}
+.item__imgWrap--big { aspect-ratio: 16 / 11; }
+
+.item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 10px;
+  transform: translateZ(0);
+  transition: transform .2s ease;
+}
+.tilt:hover .item__img {
+  transform: translate3d(0, -2px, 0) scale(1.02);
+}
+
+/* shiny highlight following pointer */
+.shine {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(400px 220px at calc(var(--px) * 100%) calc(var(--py) * 100%),
+    rgba(255,255,255,.85), transparent 55%);
+  opacity: calc(.12 + (var(--tilt) * .18));
+  transform: translateZ(0);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.item__body {
+  padding: 12px 12px 14px;
+  min-width: 0;
+}
+.item__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.item__name {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.item__price {
+  font-weight: 1000;
+  color: #b24a4a;
+  white-space: nowrap;
+}
+.item__desc {
+  margin-top: 6px;
+  opacity: 0.82;
+  line-height: 1.5;
+  font-size: 13px;
+}
+.item__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill, .mini {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+.pill--green {
+  border-color: rgba(56, 134, 86, 0.22);
+  background: rgba(56, 134, 86, 0.08);
+}
+.pill--hot{
+  border-color: rgba(178, 74, 74, 0.3);
+  background: rgba(178, 74, 74, 0.12);
+}
+
+.item--big { grid-template-rows: auto 1fr; }
+
+/* favorite micro-interaction */
+.fav {
+  margin-left: auto;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255,255,255,.55);
+  border-radius: 999px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.fav:hover { transform: translateY(-1px); }
+.fav__heart {
+  font-weight: 1000;
+  color: rgba(178, 74, 74, .65);
+  transform: translateZ(0);
+}
+.fav--on {
+  background: rgba(178, 74, 74, 0.12);
+  border-color: rgba(178, 74, 74, 0.22);
+}
+.fav--on .fav__heart { color: rgba(178, 74, 74, .95); }
+
+/* little burst */
+.fav__burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(6px 6px at 20% 30%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(5px 5px at 70% 20%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(7px 7px at 80% 70%, rgba(255,255,255,.85), transparent 60%),
+    radial-gradient(5px 5px at 30% 80%, rgba(255,255,255,.75), transparent 60%);
+  opacity: 0;
+}
+.fav--on .fav__burst {
+  animation: burst .45s ease-out;
+}
+@keyframes burst {
+  0% { opacity: 0; transform: scale(.8); }
+  35% { opacity: .9; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+
+/* -------------------------
+   CTA
+-------------------------- */
+.cta {
+  margin-top: 14px;
+  border-radius: 22px;
+  padding: 14px;
+  background: rgba(178, 74, 74, 0.1);
+  border: 1px solid rgba(178, 74, 74, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.ctaTitle { font-weight: 1000; }
+.ctaText { opacity: 0.8; margin-top: 2px; }
+
+/* -------------------------
+   Buttons
+-------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+  text-decoration: none;
+  user-select: none;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0px) scale(0.99); }
+
+.btn--primary {
+  background: #b24a4a;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(178, 74, 74, 0.26);
+}
+.btn--primary:hover { background: #933737; }
+
+.btn--ghost {
+  background: rgba(163, 147, 147, 0.08);
+  color: #111;
+  box-shadow: none;
+}
+.btn--ghost:hover { background: rgba(232, 13, 13, 0.12); }
+
+/* -------------------------
+   Modal
+-------------------------- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 12, 10, 0.45);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  z-index: 100;
+}
+
+.modal {
+  width: min(980px, 100%);
+  border-radius: 26px;
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow: 0 30px 90px rgba(10,6,5,.35);
+  overflow: hidden;
+  position: relative;
+}
+
+.modal__close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  font-size: 26px;
+  font-weight: 1000;
+  background: rgba(0,0,0,.08);
+}
+
+.modal__grid{
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+}
+
+.modal__media{
+  position: relative;
+  background:
+    radial-gradient(600px 400px at 30% 20%, rgba(178,74,74,.18), transparent 60%),
+    rgba(255,255,255,.55);
+  border-right: 1px solid rgba(80,55,48,.12);
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+}
+
+.modal__img{
+  width: min(420px, 86%);
+  height: auto;
+  object-fit: contain;
+  transform: translateZ(0);
+  animation: pop .28s ease-out;
+}
+@keyframes pop { from { transform: scale(.96); opacity: .7; } to { transform: scale(1); opacity: 1; } }
+
+.modal__glow{
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(500px 280px at 40% 35%, rgba(255,255,255,.85), transparent 60%);
+  opacity: .55;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.modal__body{
+  padding: 18px 18px 20px;
+}
+
+.modal__top{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.modal__title{
+  font-size: 20px;
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+}
+.modal__price{
+  font-weight: 1000;
+  color: #b24a4a;
+}
+.modal__desc{
+  margin-top: 8px;
+  opacity: .86;
+  line-height: 1.6;
+}
+.modal__pills{
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* builder */
+.builder{
+  margin-top: 14px;
+  border-radius: 20px;
+  padding: 14px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(80,55,48,.12);
+}
+.builder__title{
+  font-weight: 1000;
+  margin-bottom: 10px;
+}
+.builder__row{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.builder__label{
+  font-weight: 900;
+  opacity: .9;
+  width: 92px;
+}
+.builder__value{
+  font-weight: 1000;
+  opacity: .85;
+}
+
+/* switch */
+.switch{
+  width: 56px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(80,55,48,.16);
+  background: rgba(0,0,0,.08);
+  cursor: pointer;
+  position: relative;
+  transition: background .2s ease, border-color .2s ease;
+}
+.switch__dot{
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.95);
+  transition: left .2s ease;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.switch--on{
+  background: rgba(178,74,74,.22);
+  border-color: rgba(178,74,74,.28);
+}
+.switch--on .switch__dot{ left: 28px; }
+
+/* segmented */
+.seg{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.seg__btn{
+  border: 1px solid rgba(80,55,48,.14);
+  background: rgba(255,255,255,.55);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 1000;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.seg__btn:hover{ transform: translateY(-1px); }
+.seg__btn--on{
+  background: rgba(178,74,74,.13);
+  border-color: rgba(178,74,74,.25);
+}
+
+/* range */
+.range{
+  width: 100%;
+  accent-color: #b24a4a;
+}
+
+.builder__summary{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(80,55,48,.12);
+}
+.builder__line{
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.builder__actions{
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal__hint{
+  margin-top: 12px;
+  opacity: .75;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+/* -------------------------
+   Reveal animation
+-------------------------- */
+.reveal{
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* -------------------------
+   Responsive
+-------------------------- */
+@media (max-width: 980px) {
+  .menuGrid { grid-template-columns: 1fr; }
+  .items { grid-template-columns: 1fr; }
+  .modal__grid { grid-template-columns: 1fr; }
+  .modal__media { border-right: none; border-bottom: 1px solid rgba(80,55,48,.12); }
+  .floatNav { width: calc(100% - 22px); justify-content: space-between; }
+}
+@media (max-width: 520px) {
+  .page { padding-top: 90px; }
+  .head { padding: 22px 16px; }
+  .card { padding: 16px; }
+  .chip { padding: 10px 10px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bg__blob--1, .bg__blob--2, .bg__sparkles { animation: none !important; }
+  .reveal { transition: none; opacity: 1; transform: none; }
+  .tilt:where(:hover, :focus-visible) { transform: translateY(-1px); }
+}
+</style>
+
+
+
+
+
+
+
+
+
+интереор каре кодул импортант
+<template>
+  <div class="page">
+    <!-- BACKGROUND -->
+    <div class="bg" aria-hidden="true">
+      <div class="bg__warm" />
+      <div class="bg__grain" />
+      <div class="bg__blob bg__blob--1" />
+      <div class="bg__blob bg__blob--2" />
+    </div>
+
+    <main class="wrap">
+      <!-- HEADER -->
+      <section class="head">
+        <div class="head__badge">☕ Меню — For-L∞ve</div>
+
+        <h1 class="head__title">
+          Выбирай вкус <span class="dot">с любовью.</span>
+        </h1>
+
+        <p class="head__text">
+          Слева — кофе и напитки, справа — блинчики. Всё свежее и вкусное ✨
+        </p>
+
+        <div class="head__actions">
+          <NuxtLink class="btn btn--primary" to="/booking">
+            Забронировать столик
+          </NuxtLink>
+          <NuxtLink class="btn btn--ghost" to="/contacts">Контакты</NuxtLink>
+        </div>
+      </section>
+
+      <!-- GRID -->
+      <section class="menuGrid">
+        <!-- LEFT -->
+        <article class="card">
+          <div class="card__head">
+            <h2 class="card__title">Кофе & напитки</h2>
+            <p class="card__subtitle">
+              Сиропы, мороженое, настроение — выбирай своё.
+            </p>
+          </div>
+
+          <!-- COFFEE -->
+          <div class="group">
+            <div class="group__top">
+              <div class="group__badge">For-L∞ve coffee</div>
+              <div class="group__title">Кофе</div>
+            </div>
+
+            <div class="items">
+              <div v-for="p in coffee" :key="p.title" class="item">
+                <div class="item__imgWrap">
+                  <img
+                    class="item__img"
+                    :src="p.img"
+                    :alt="p.title"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }}</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill">{{ p.tag }}</span>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DRINKS -->
+          <div class="group">
+            <div class="group__top">
+              <div class="group__badge group__badge--soft">For-L∞ve drinks</div>
+              <div class="group__title">Чай / напитки</div>
+            </div>
+
+            <div class="items">
+              <div v-for="p in drinks" :key="p.title" class="item">
+                <div class="item__imgWrap">
+                  <img
+                    class="item__img"
+                    :src="p.img"
+                    :alt="p.title"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }}</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill pill--green">{{ p.tag }}</span>
+                    <span class="mini">лёд</span>
+                    <span class="mini">цитрус</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- RIGHT -->
+        <aside class="card card--accent right">
+          <div class="card__head">
+            <h2 class="card__title">Блинчики</h2>
+            <p class="card__subtitle">Сладкие, нежные — идеальны к кофе.</p>
+          </div>
+
+          <div class="items items--single">
+            <div v-for="p in crepes" :key="p.title" class="item item--big">
+              <div class="item__imgWrap item__imgWrap--big">
+                <img
+                  class="item__img"
+                  :src="p.img"
+                  :alt="p.title"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="item__body">
+                <div class="item__row">
+                  <div class="item__name">{{ p.title }}</div>
+                  <div class="item__price">{{ p.price }}</div>
+                </div>
+
+                <div class="item__desc">{{ p.desc }}</div>
+
+                <div class="item__meta">
+                  <span class="pill">{{ p.tag }}</span>
+                  <span class="mini">добавки</span>
+                  <span class="mini">шоколад</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta">
+            <div class="ctaLeft">
+              <div class="ctaTitle">Хочешь помочь выбрать?</div>
+              <div class="ctaText">Напиши нам — подскажем по вкусу.</div>
+            </div>
+
+            <NuxtLink class="btn btn--primary" to="/contacts">Написать</NuxtLink>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+useHead({
+  title: "Меню — For Love Coffee",
+  meta: [
+    {
+      name: "description",
+      content: "Меню For Love Coffee: кофе, чай и сладкие блинчики.",
+    },
+  ],
+})
+
+// ✅ public/ — никаких asset() не нужно
+const coffee = [
+  {
+    title: "Raspberry Ice Coffee",
+    desc: "Холодный кофе с мороженым и малиновым акцентом.",
+    price: "59 MDL",
+    img: "image-10.png",
+    tag: "sweet",
+  },
+  {
+    title: "Pistachio Ice Coffee",
+    desc: "Нежный вкус фисташки + малина.",
+    price: "59 MDL",
+    img: "image-11.png",
+    tag: "nutty",
+  },
+  {
+    title: "Oreo Ice Coffee",
+    desc: "Кремовая текстура и крошка печенья Oreo.",
+    price: "59 MDL",
+    img: "image-12.png",
+    tag: "creamy",
+  },
+  {
+    title: "Bounty Ice Coffee",
+    desc: "Шоколадный топпинг и кокосовое настроение.",
+    price: "59 MDL",
+    img: "image-13.png",
+    tag: "choco",
+  },
+]
+
+const drinks = [
+  {
+    title: "For-L∞ve Tea (Lemon)",
+    desc: "Освежающий чай со льдом, лимоном и мятой.",
+    price: "39 MDL",
+    img: "image-15.png",
+    tag: "fresh",
+  },
+  {
+    title: "Mojito (Non-Alcohol)",
+    desc: "Лайм, мята, лёд — бодрит и освежает.",
+    price: "45 MDL",
+    img: "image-14.png",
+    tag: "cool",
+  },
+]
+
+const crepes = [
+  {
+    title: "Crepe Strawberry",
+    desc: "Клубника, крем и сахарная пудра — нежно и ярко.",
+    price: "65 MDL",
+    img: "image-16.png",
+    tag: "berry",
+  },
+  {
+    title: "Crepe Banana & Choco",
+    desc: "Банан + шоколад, идеальная пара к кофе.",
+    price: "65 MDL",
+    img: "image-17.png",
+    tag: "classic",
+  },
+  {
+    title: "Crepe Nutella & Coconut",
+    desc: "Шоколадная паста, кокос и орехи — сладкий топ.",
+    price: "69 MDL",
+    img: "image-18.png",
+    tag: "top",
+  },
+]
+</script>
+
+<style scoped>
+/* твой CSS оставляю как есть — он норм */
+
+.page {
+  min-height: 100vh;
+  padding: 90px 18px 64px; /* era 120px */
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #241b18;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.bg__warm {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1100px 700px at 20% 10%, rgba(255, 228, 214, 0.9), transparent 60%),
+    radial-gradient(900px 600px at 85% 30%, rgba(255, 214, 196, 0.65), transparent 60%),
+    radial-gradient(900px 900px at 45% 100%, rgba(214, 170, 150, 0.35), transparent 60%),
+    linear-gradient(180deg, #fff 0%, #fbf5f1 45%, #f5ede8 100%);
+}
+
+.bg__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.bg__blob {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  filter: blur(40px);
+  opacity: 0.35;
+  border-radius: 999px;
+  transform: translate3d(0, 0, 0);
+}
+
+.bg__blob--1 {
+  left: -140px;
+  top: 120px;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 88, 52, 0.55), transparent 60%);
+  animation: floaty 12s ease-in-out infinite;
+}
+
+.bg__blob--2 {
+  right: -180px;
+  bottom: -140px;
+  background: radial-gradient(circle at 30% 30%, rgba(130, 70, 55, 0.55), transparent 60%);
+  animation: floaty 14s ease-in-out infinite reverse;
+}
+
+@keyframes floaty {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(22px, -18px) scale(1.03);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.head {
+  border-radius: 26px;
+  padding: 26px 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1), 0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  backdrop-filter: blur(10px);
+}
+
+.head__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 800;
+  color: #7a3b2b;
+  font-size: 13px;
+}
+
+.head__title {
+  margin: 14px 0 6px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  color: rgba(233, 68, 68, 0.95);
+  text-shadow: 0 10px 25px rgba(196, 88, 52, 0.25);
+}
+
+.head__text {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0.88;
+}
+
+.head__actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+.btn--primary {
+  background: #b24a4a;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(178, 74, 74, 0.26);
+}
+
+.btn--primary:hover {
+  background: #933737;
+}
+
+.btn--ghost {
+  background: rgba(163, 147, 147, 0.08);
+  color: #111;
+  box-shadow: none;
+}
+
+.btn--ghost:hover {
+  background: rgba(232, 13, 13, 0.12);
+}
+
+.menuGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 14px;
+}
+
+.card {
+  border-radius: 26px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.card--accent {
+  background: radial-gradient(900px 500px at 30% 10%, rgba(196, 88, 52, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.62);
+}
+
+.card__head {
+  margin-bottom: 14px;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.card__subtitle {
+  margin: 6px 0 0;
+  opacity: 0.78;
+  line-height: 1.5;
+}
+
+.right {
+  align-self: start;
+}
+
+.group {
+  margin-top: 14px;
+}
+
+.group__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.group__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 900;
+  font-size: 12px;
+  color: #7a3b2b;
+}
+
+.group__badge--soft {
+  background: rgba(178, 74, 74, 0.1);
+  border-color: rgba(178, 74, 74, 0.18);
+  color: #7c2f2f;
+}
+
+.group__title {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.items--single {
+  grid-template-columns: 1fr;
+}
+
+.item {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(196, 88, 52, 0.22);
+}
+
+.item__imgWrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.item__imgWrap--big {
+  aspect-ratio: 16 / 11;
+}
+
+.item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 10px;
+}
+
+.item__body {
+  padding: 12px 12px 14px;
+  min-width: 0;
+}
+
+.item__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.item__name {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.item__price {
+  font-weight: 1000;
+  color: #b24a4a;
+  white-space: nowrap;
+}
+
+.item__desc {
+  margin-top: 6px;
+  opacity: 0.82;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.item__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.pill--green {
+  border-color: rgba(56, 134, 86, 0.22);
+  background: rgba(56, 134, 86, 0.08);
+}
+
+.mini {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.cta {
+  margin-top: 14px;
+  border-radius: 22px;
+  padding: 14px;
+  background: rgba(178, 74, 74, 0.1);
+  border: 1px solid rgba(178, 74, 74, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.ctaTitle {
+  font-weight: 1000;
+}
+
+.ctaText {
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+@media (max-width: 980px) {
+  .menuGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .items {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 520px) {
+  .page {
+    padding-top: 90px;
+  }
+
+  .head {
+    padding: 22px 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
+</style>
+
+
+
+
+
+
+
+
+
+
+///
+aici ii cu corzina
+<template>
+  <div class="page">
+    <!-- BACKGROUND -->
+    <div class="bg" aria-hidden="true">
+      <div class="bg__warm" />
+      <div class="bg__grain" />
+      <div class="bg__blob bg__blob--1" />
+      <div class="bg__blob bg__blob--2" />
+    </div>
+
+    <main class="wrap">
+      <!-- HEADER -->
+      <section class="head">
+        <div class="head__badge">☕ Меню — For-L∞ve</div>
+
+        <h1 class="head__title">
+          Выбирай вкус <span class="dot">с любовью.</span>
+        </h1>
+
+        <p class="head__text">
+          Слева — кофе и напитки, справа — блинчики. Всё свежее и вкусное ✨
+        </p>
+
+        <div class="head__actions">
+          <NuxtLink class="btn btn--primary" to="/booking">Забронировать столик</NuxtLink>
+          <NuxtLink class="btn btn--ghost" to="/contacts">Контакты</NuxtLink>
+
+          <button class="btn btn--ghost cartBtn" type="button" @click="openCart">
+            Корзина
+            <span v-if="totalQty" class="cartBadge">{{ totalQty }}</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- GRID -->
+      <section class="menuGrid">
+        <!-- LEFT -->
+        <article class="card">
+          <div class="card__head">
+            <h2 class="card__title">Кофе & напитки</h2>
+            <p class="card__subtitle">
+              Сиропы, мороженое, настроение — выбирай своё.
+            </p>
+          </div>
+
+          <!-- COFFEE -->
+          <div class="group">
+            <div class="group__top">
+              <div class="group__badge">For-L∞ve coffee</div>
+              <div class="group__title">Кофе</div>
+            </div>
+
+            <div class="items">
+              <div v-for="p in coffee" :key="p.id" class="item">
+                <div class="item__imgWrap">
+                  <img class="item__img" :src="p.img" :alt="p.title" loading="lazy" />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }} MDL</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill">{{ p.tag }}</span>
+                    <button class="buyBtn" type="button" @click="buy(p)">Купить</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DRINKS -->
+          <div class="group">
+            <div class="group__top">
+              <div class="group__badge group__badge--soft">For-L∞ve drinks</div>
+              <div class="group__title">Чай / напитки</div>
+            </div>
+
+            <div class="items">
+              <div v-for="p in drinks" :key="p.id" class="item">
+                <div class="item__imgWrap">
+                  <img class="item__img" :src="p.img" :alt="p.title" loading="lazy" />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }} MDL</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill pill--green">{{ p.tag }}</span>
+                    <span class="mini">лёд</span>
+                    <span class="mini">цитрус</span>
+
+                    <button class="buyBtn" type="button" @click="buy(p)">Купить</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- RIGHT -->
+        <aside class="card card--accent right">
+          <div class="card__head">
+            <h2 class="card__title">Блинчики</h2>
+            <p class="card__subtitle">Сладкие, нежные — идеальны к кофе.</p>
+          </div>
+
+          <div class="items items--single">
+            <div v-for="p in crepes" :key="p.id" class="item item--big">
+              <div class="item__imgWrap item__imgWrap--big">
+                <img class="item__img" :src="p.img" :alt="p.title" loading="lazy" />
+              </div>
+
+              <div class="item__body">
+                <div class="item__row">
+                  <div class="item__name">{{ p.title }}</div>
+                  <div class="item__price">{{ p.price }} MDL</div>
+                </div>
+
+                <div class="item__desc">{{ p.desc }}</div>
+
+                <div class="item__meta">
+                  <span class="pill">{{ p.tag }}</span>
+                  <span class="mini">добавки</span>
+                  <span class="mini">шоколад</span>
+
+                  <button class="buyBtn" type="button" @click="buy(p)">Купить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta">
+            <div class="ctaLeft">
+              <div class="ctaTitle">Хочешь помочь выбрать?</div>
+              <div class="ctaText">Напиши нам — подскажем по вкусу.</div>
+            </div>
+
+            <NuxtLink class="btn btn--primary" to="/contacts">Написать</NuxtLink>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <!-- TOAST -->
+    <div class="toast" :data-show="toast.show">
+      {{ toast.text }}
+    </div>
+
+    <!-- CART DRAWER -->
+    <div class="drawer" :data-open="cartOpen" @click.self="cartOpen = false">
+      <div class="drawerPanel">
+        <div class="drawerTop">
+          <div class="drawerTitle">Корзина</div>
+          <button class="iconBtn" type="button" @click="cartOpen = false">✕</button>
+        </div>
+
+        <div v-if="cart.length" class="drawerList">
+          <div v-for="i in cart" :key="i.id" class="drawerItem">
+            <img class="drawerImg" :src="i.img" :alt="i.title" loading="lazy" />
+
+            <div class="drawerInfo">
+              <div class="drawerName">{{ i.title }}</div>
+              <div class="drawerSub">{{ i.price }} MDL • {{ i.tag }}</div>
+
+              <div class="qtyRow">
+                <button class="qtyBtn" type="button" @click="dec(i.id)">−</button>
+                <div class="qtyNum">{{ i.qty }}</div>
+                <button class="qtyBtn" type="button" @click="inc(i.id)">+</button>
+
+                <button class="removeBtn" type="button" @click="remove(i.id)">Удалить</button>
+              </div>
+            </div>
+
+            <div class="drawerLinePrice">{{ i.price * i.qty }} MDL</div>
+          </div>
+        </div>
+
+        <div v-else class="empty">
+          <div class="emptyTitle">Пусто</div>
+          <div class="emptyText">Добавь что-нибудь вкусное 🙂</div>
+        </div>
+
+        <div class="drawerBottom">
+          <div class="sumRow">
+            <div class="sumLabel">Итого</div>
+            <div class="sumValue">{{ totalPrice }} MDL</div>
+          </div>
+
+          <div class="drawerActions">
+            <button class="btn btn--ghost" type="button" @click="clear" :disabled="!cart.length">
+              Очистить
+            </button>
+
+            <button
+              class="btn btn--primary"
+              type="button"
+              :disabled="!cart.length"
+              @click="showToast('Заказ оформим на следующем шаге 🙂')"
+            >
+              Оформить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useCart, type Product } from "~/composables/useCart"
+
+
+
+
+
+useHead({
+  title: "Меню — For Love Coffee",
+  meta: [
+    { name: "description", content: "Меню For Love Coffee: кофе, чай и сладкие блинчики." },
+  ],
+})
+
+const { cart, totalQty, totalPrice, add, remove, inc, dec, clear } = useCart()
+
+const cartOpen = ref(false)
+const toast = ref({ show: false, text: "" })
+
+let toastTimer: any = null
+function showToast(text: string) {
+  toast.value = { show: true, text }
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => (toast.value.show = false), 1600)
+}
+
+function buy(p: Product) {
+  add(p, 1)
+  showToast(`Добавлено: ${p.title}`)
+}
+
+function openCart() {
+  cartOpen.value = true
+}
+
+// ✅ public/ — картинки должны лежать в /public и тогда путь просто "image-10.png"
+const coffee: Product[] = [
+  {
+    id: "coffee-raspberry",
+    category: "coffee",
+    title: "Raspberry Ice Coffee",
+    desc: "Холодный кофе с мороженым и малиновым акцентом.",
+    price: 59,
+    img: "image-10.png",
+    tag: "sweet",
+  },
+  {
+    id: "coffee-pistachio",
+    category: "coffee",
+    title: "Pistachio Ice Coffee",
+    desc: "Нежный вкус фисташки + малина.",
+    price: 59,
+    img: "image-11.png",
+    tag: "nutty",
+  },
+  {
+    id: "coffee-oreo",
+    category: "coffee",
+    title: "Oreo Ice Coffee",
+    desc: "Кремовая текстура и крошка печенья Oreo.",
+    price: 59,
+    img: "image-12.png",
+    tag: "creamy",
+  },
+  {
+    id: "coffee-bounty",
+    category: "coffee",
+    title: "Bounty Ice Coffee",
+    desc: "Шоколадный топпинг и кокосовое настроение.",
+    price: 59,
+    img: "image-13.png",
+    tag: "choco",
+  },
+]
+
+const drinks: Product[] = [
+  {
+    id: "drink-tea-lemon",
+    category: "drinks",
+    title: "For-L∞ve Tea (Lemon)",
+    desc: "Освежающий чай со льдом, лимоном и мятой.",
+    price: 39,
+    img: "image-15.png",
+    tag: "fresh",
+  },
+  {
+    id: "drink-mojito-na",
+    category: "drinks",
+    title: "Mojito (Non-Alcohol)",
+    desc: "Лайм, мята, лёд — бодрит и освежает.",
+    price: 45,
+    img: "image-14.png",
+    tag: "cool",
+  },
+]
+
+const crepes: Product[] = [
+  {
+    id: "crepe-strawberry",
+    category: "crepes",
+    title: "Crepe Strawberry",
+    desc: "Клубника, крем и сахарная пудра — нежно и ярко.",
+    price: 65,
+    img: "image-16.png",
+    tag: "berry",
+  },
+  {
+    id: "crepe-banana-choco",
+    category: "crepes",
+    title: "Crepe Banana & Choco",
+    desc: "Банан + шоколад, идеальная пара к кофе.",
+    price: 65,
+    img: "image-17.png",
+    tag: "classic",
+  },
+  {
+    id: "crepe-nutella-coconut",
+    category: "crepes",
+    title: "Crepe Nutella & Coconut",
+    desc: "Шоколадная паста, кокос и орехи — сладкий топ.",
+    price: 69,
+    img: "image-18.png",
+    tag: "top",
+  },
+]
+</script>
+
+<style scoped>
+/* твой CSS + добавил интерактив и drawer */
+
+/* BASE */
+.page {
+  min-height: 100vh;
+  padding: 90px 18px 64px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #241b18;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.bg__warm {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1100px 700px at 20% 10%, rgba(255, 228, 214, 0.9), transparent 60%),
+    radial-gradient(900px 600px at 85% 30%, rgba(255, 214, 196, 0.65), transparent 60%),
+    radial-gradient(900px 900px at 45% 100%, rgba(214, 170, 150, 0.35), transparent 60%),
+    linear-gradient(180deg, #fff 0%, #fbf5f1 45%, #f5ede8 100%);
+}
+
+.bg__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.bg__blob {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  filter: blur(40px);
+  opacity: 0.35;
+  border-radius: 999px;
+  transform: translate3d(0, 0, 0);
+}
+
+.bg__blob--1 {
+  left: -140px;
+  top: 120px;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 88, 52, 0.55), transparent 60%);
+  animation: floaty 12s ease-in-out infinite;
+}
+
+.bg__blob--2 {
+  right: -180px;
+  bottom: -140px;
+  background: radial-gradient(circle at 30% 30%, rgba(130, 70, 55, 0.55), transparent 60%);
+  animation: floaty 14s ease-in-out infinite reverse;
+}
+
+@keyframes floaty {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(22px, -18px) scale(1.03);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.head {
+  border-radius: 26px;
+  padding: 26px 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1), 0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  backdrop-filter: blur(10px);
+}
+
+.head__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 800;
+  color: #7a3b2b;
+  font-size: 13px;
+}
+
+.head__title {
+  margin: 14px 0 6px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  color: rgba(233, 68, 68, 0.95);
+  text-shadow: 0 10px 25px rgba(196, 88, 52, 0.25);
+}
+
+.head__text {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0.88;
+}
+
+.head__actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+.btn--primary {
+  background: #b24a4a;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(178, 74, 74, 0.26);
+}
+
+.btn--primary:hover {
+  background: #933737;
+}
+
+.btn--ghost {
+  background: rgba(163, 147, 147, 0.08);
+  color: #111;
+  box-shadow: none;
+}
+
+.btn--ghost:hover {
+  background: rgba(232, 13, 13, 0.12);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.menuGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 14px;
+}
+
+.card {
+  border-radius: 26px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.card--accent {
+  background: radial-gradient(900px 500px at 30% 10%, rgba(196, 88, 52, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.62);
+}
+
+.card__head {
+  margin-bottom: 14px;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.card__subtitle {
+  margin: 6px 0 0;
+  opacity: 0.78;
+  line-height: 1.5;
+}
+
+.right {
+  align-self: start;
+}
+
+.group {
+  margin-top: 14px;
+}
+
+.group__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.group__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 900;
+  font-size: 12px;
+  color: #7a3b2b;
+}
+
+.group__badge--soft {
+  background: rgba(178, 74, 74, 0.1);
+  border-color: rgba(178, 74, 74, 0.18);
+  color: #7c2f2f;
+}
+
+.group__title {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.items--single {
+  grid-template-columns: 1fr;
+}
+
+.item {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(196, 88, 52, 0.22);
+}
+
+.item__imgWrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.item__imgWrap--big {
+  aspect-ratio: 16 / 11;
+}
+
+.item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 10px;
+}
+
+.item__body {
+  padding: 12px 12px 14px;
+  min-width: 0;
+}
+
+.item__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.item__name {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.item__price {
+  font-weight: 1000;
+  color: #b24a4a;
+  white-space: nowrap;
+}
+
+.item__desc {
+  margin-top: 6px;
+  opacity: 0.82;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.item__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.pill--green {
+  border-color: rgba(56, 134, 86, 0.22);
+  background: rgba(56, 134, 86, 0.08);
+}
+
+.mini {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.cta {
+  margin-top: 14px;
+  border-radius: 22px;
+  padding: 14px;
+  background: rgba(178, 74, 74, 0.1);
+  border: 1px solid rgba(178, 74, 74, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.ctaTitle {
+  font-weight: 1000;
+}
+
+.ctaText {
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* BUY BUTTON */
+.buyBtn {
+  margin-left: auto;
+  border: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(178, 74, 74, 0.12);
+  border: 1px solid rgba(178, 74, 74, 0.22);
+  color: #7c2f2f;
+  transition: transform 140ms ease, background 140ms ease;
+}
+.buyBtn:hover {
+  transform: translateY(-1px);
+  background: rgba(178, 74, 74, 0.18);
+}
+.buyBtn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* CART BUTTON BADGE */
+.cartBtn {
+  position: relative;
+}
+.cartBadge {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 1000;
+  background: rgba(178, 74, 74, 0.18);
+  border: 1px solid rgba(178, 74, 74, 0.28);
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%) translateY(14px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.16);
+  backdrop-filter: blur(10px);
+  font-weight: 900;
+}
+.toast[data-show="true"] {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0px);
+  transition: all 160ms ease;
+}
+
+/* DRAWER */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 10, 10, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+.drawer[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.drawerPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(420px, 92vw);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px);
+  border-left: 1px solid rgba(80, 55, 48, 0.14);
+  box-shadow: -18px 0 60px rgba(32, 18, 14, 0.18);
+  transform: translateX(18px);
+  transition: transform 180ms ease;
+  display: flex;
+  flex-direction: column;
+}
+.drawer[data-open="true"] .drawerPanel {
+  transform: translateX(0px);
+}
+
+.drawerTop {
+  padding: 14px 14px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(80, 55, 48, 0.12);
+}
+.drawerTitle {
+  font-weight: 1000;
+  font-size: 18px;
+}
+.iconBtn {
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.drawerList {
+  padding: 12px;
+  overflow: auto;
+  flex: 1;
+  display: grid;
+  gap: 10px;
+}
+.drawerItem {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+}
+.drawerImg {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(80, 55, 48, 0.10);
+  padding: 6px;
+}
+.drawerInfo {
+  min-width: 0;
+}
+.drawerName {
+  font-weight: 1000;
+  line-height: 1.2;
+}
+.drawerSub {
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+.qtyRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.qtyBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-weight: 1000;
+}
+.qtyNum {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 1000;
+}
+.removeBtn {
+  margin-left: auto;
+  border: 1px solid rgba(178, 74, 74, 0.22);
+  background: rgba(178, 74, 74, 0.10);
+  color: #7c2f2f;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.drawerLinePrice {
+  font-weight: 1000;
+  color: #b24a4a;
+  white-space: nowrap;
+  align-self: start;
+  padding-top: 2px;
+}
+
+.empty {
+  padding: 18px;
+  opacity: 0.85;
+}
+.emptyTitle {
+  font-weight: 1000;
+}
+.emptyText {
+  margin-top: 4px;
+}
+
+.drawerBottom {
+  padding: 12px;
+  border-top: 1px solid rgba(80, 55, 48, 0.12);
+}
+.sumRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px 12px;
+  border-radius: 18px;
+  background: rgba(178, 74, 74, 0.08);
+  border: 1px solid rgba(178, 74, 74, 0.16);
+}
+.sumLabel {
+  font-weight: 1000;
+  opacity: 0.85;
+}
+.sumValue {
+  font-weight: 1000;
+  color: #b24a4a;
+}
+
+.drawerActions {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 980px) {
+  .menuGrid {
+    grid-template-columns: 1fr;
+  }
+  .items {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding-top: 90px;
+  }
+  .head {
+    padding: 22px 16px;
+  }
+  .card {
+    padding: 16px;
+  }
+}
+</style>
+
+////
+
+
+
+
+
+полный код
+<template>
+  <div class="page">
+    <!-- BACKGROUND -->
+    <div class="bg" aria-hidden="true">
+      <div class="bg__warm" />
+      <div class="bg__grain" />
+      <div class="bg__blob bg__blob--1" />
+      <div class="bg__blob bg__blob--2" />
+    </div>
+
+    <main class="wrap">
+      <!-- HEADER -->
+      <section class="head">
+        <div class="head__badge">☕ Меню — For-L∞ve</div>
+
+        <h1 class="head__title">
+          Выбирай вкус <span class="dot">с любовью.</span>
+        </h1>
+
+        <p class="head__text">
+          Слева — кофе и напитки, справа — блинчики. Всё свежее и вкусное ✨
+        </p>
+
+        <div class="head__actions">
+          <NuxtLink class="btn btn--primary" to="/booking">Забронировать столик</NuxtLink>
+          <NuxtLink class="btn btn--ghost" to="/contacts">Контакты</NuxtLink>
+
+          <button class="btn btn--ghost cartBtn" type="button" @click="openCart">
+            Корзина
+            <span v-if="totalQty" class="cartBadge">{{ totalQty }}</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- GRID -->
+      <section class="menuGrid">
+        <!-- LEFT -->
+        <article class="card">
+          <div class="card__head">
+            <h2 class="card__title">Кофе & напитки</h2>
+            <p class="card__subtitle">
+              Сиропы, мороженое, настроение — выбирай своё.
+            </p>
+          </div>
+
+          <!-- COFFEE -->
+          <div class="group">
+            <div class="group__top">
+              <div class="group__badge">For-L∞ve coffee</div>
+              <div class="group__title">Кофе</div>
+            </div>
+
+            <div class="items">
+              <div v-for="p in coffee" :key="p.id" class="item">
+                <div class="item__imgWrap">
+                  <img class="item__img" :src="p.img" :alt="p.title" loading="lazy" />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }} MDL</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill">{{ p.tag }}</span>
+                    <button class="buyBtn" type="button" @click="buy(p)">Купить</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DRINKS -->
+          <div class="group">
+            <div class="group__top">
+              <div class="group__badge group__badge--soft">For-L∞ve drinks</div>
+              <div class="group__title">Чай / напитки</div>
+            </div>
+
+            <div class="items">
+              <div v-for="p in drinks" :key="p.id" class="item">
+                <div class="item__imgWrap">
+                  <img class="item__img" :src="p.img" :alt="p.title" loading="lazy" />
+                </div>
+
+                <div class="item__body">
+                  <div class="item__row">
+                    <div class="item__name">{{ p.title }}</div>
+                    <div class="item__price">{{ p.price }} MDL</div>
+                  </div>
+
+                  <div class="item__desc">{{ p.desc }}</div>
+
+                  <div class="item__meta">
+                    <span class="pill pill--green">{{ p.tag }}</span>
+                    <span class="mini">лёд</span>
+                    <span class="mini">цитрус</span>
+
+                    <button class="buyBtn" type="button" @click="buy(p)">Купить</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- RIGHT -->
+        <aside class="card card--accent right">
+          <div class="card__head">
+            <h2 class="card__title">Блинчики</h2>
+            <p class="card__subtitle">Сладкие, нежные — идеальны к кофе.</p>
+          </div>
+
+          <div class="items items--single">
+            <div v-for="p in crepes" :key="p.id" class="item item--big">
+              <div class="item__imgWrap item__imgWrap--big">
+                <img class="item__img" :src="p.img" :alt="p.title" loading="lazy" />
+              </div>
+
+              <div class="item__body">
+                <div class="item__row">
+                  <div class="item__name">{{ p.title }}</div>
+                  <div class="item__price">{{ p.price }} MDL</div>
+                </div>
+
+                <div class="item__desc">{{ p.desc }}</div>
+
+                <div class="item__meta">
+                  <span class="pill">{{ p.tag }}</span>
+                  <span class="mini">добавки</span>
+                  <span class="mini">шоколад</span>
+
+                  <button class="buyBtn" type="button" @click="buy(p)">Купить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta">
+            <div class="ctaLeft">
+              <div class="ctaTitle">Хочешь помочь выбрать?</div>
+              <div class="ctaText">Напиши нам — подскажем по вкусу.</div>
+            </div>
+
+            <NuxtLink class="btn btn--primary" to="/contacts">Написать</NuxtLink>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <!-- TOAST -->
+    <div class="toast" :data-show="toast.show">
+      {{ toast.text }}
+    </div>
+
+    <!-- CART DRAWER -->
+    <div class="drawer" :data-open="cartOpen" @click.self="cartOpen = false">
+      <div class="drawerPanel">
+        <div class="drawerTop">
+          <div class="drawerTitle">Корзина</div>
+          <button class="iconBtn" type="button" @click="cartOpen = false">✕</button>
+        </div>
+
+        <div v-if="cart.length" class="drawerList">
+          <div v-for="i in cart" :key="i.id" class="drawerItem">
+            <img class="drawerImg" :src="i.img" :alt="i.title" loading="lazy" />
+
+            <div class="drawerInfo">
+              <div class="drawerName">{{ i.title }}</div>
+              <div class="drawerSub">{{ i.price }} MDL • {{ i.tag }}</div>
+
+              <div class="qtyRow">
+                <button class="qtyBtn" type="button" @click="dec(i.id)">−</button>
+                <div class="qtyNum">{{ i.qty }}</div>
+                <button class="qtyBtn" type="button" @click="inc(i.id)">+</button>
+
+                <button class="removeBtn" type="button" @click="remove(i.id)">Удалить</button>
+              </div>
+            </div>
+
+            <div class="drawerLinePrice">{{ i.price * i.qty }} MDL</div>
+          </div>
+        </div>
+
+        <div v-else class="empty">
+          <div class="emptyTitle">Пусто</div>
+          <div class="emptyText">Добавь что-нибудь вкусное 🙂</div>
+        </div>
+
+        <div class="drawerBottom">
+          <div class="sumRow">
+            <div class="sumLabel">Итого</div>
+            <div class="sumValue">{{ totalPrice }} MDL</div>
+          </div>
+
+          <div class="drawerActions">
+            <button class="btn btn--ghost" type="button" @click="clear" :disabled="!cart.length">
+              Очистить
+            </button>
+
+           <button
+  class="btn btn--primary"
+  type="button"
+  :disabled="!cart.length"
+  @click="goCheckout"
+>
+  Оформить
+</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useCart, type Product } from "~/composables/useCart"
+
+
+const router = useRouter()
+
+function goCheckout() {
+  cartOpen.value = false
+  router.push("/checkout")
+}
+
+
+
+useHead({
+  title: "Меню — For Love Coffee",
+  meta: [
+    { name: "description", content: "Меню For Love Coffee: кофе, чай и сладкие блинчики." },
+  ],
+})
+
+const { cart, totalQty, totalPrice, add, remove, inc, dec, clear } = useCart()
+
+const cartOpen = ref(false)
+const toast = ref({ show: false, text: "" })
+
+let toastTimer: any = null
+function showToast(text: string) {
+  toast.value = { show: true, text }
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => (toast.value.show = false), 1600)
+}
+
+function buy(p: Product) {
+  add(p, 1)
+  showToast(`Добавлено: ${p.title}`)
+}
+
+function openCart() {
+  cartOpen.value = true
+}
+
+// ✅ public/ — картинки должны лежать в /public и тогда путь просто "image-10.png"
+const coffee: Product[] = [
+  {
+    id: "coffee-raspberry",
+    category: "coffee",
+    title: "Raspberry Ice Coffee",
+    desc: "Холодный кофе с мороженым и малиновым акцентом.",
+    price: 59,
+    img: "image-10.png",
+    tag: "sweet",
+  },
+  {
+    id: "coffee-pistachio",
+    category: "coffee",
+    title: "Pistachio Ice Coffee",
+    desc: "Нежный вкус фисташки + малина.",
+    price: 59,
+    img: "image-11.png",
+    tag: "nutty",
+  },
+  {
+    id: "coffee-oreo",
+    category: "coffee",
+    title: "Oreo Ice Coffee",
+    desc: "Кремовая текстура и крошка печенья Oreo.",
+    price: 59,
+    img: "image-12.png",
+    tag: "creamy",
+  },
+  {
+    id: "coffee-bounty",
+    category: "coffee",
+    title: "Bounty Ice Coffee",
+    desc: "Шоколадный топпинг и кокосовое настроение.",
+    price: 59,
+    img: "image-13.png",
+    tag: "choco",
+  },
+  {
+    id: "coffee-americano",
+    category: "coffee",
+    title: "Americano",
+    desc: "Классический черный кофе, насыщенный и бодрящий.",
+    price: 39,
+    img: "image-19.png",
+    tag: "hot",
+  },
+  {
+    id: "coffee-raf",
+    category: "coffee",
+    title: "Raf Coffee",
+    desc: "Сливочный кофе с ванильным сахаром и нежной пенкой.",
+    price: 55,
+    img: "image-20.png",
+    tag: "creamy",
+  },
+  {
+    id: "coffee-flat-white",
+    category: "coffee",
+    title: "Flat White",
+    desc: "Двойной эспрессо с тонким слоем вспененного молока.",
+    price: 49,
+    img: "image-21.png",
+    tag: "strong",
+  },
+  {
+    id: "coffee-latte-banana",
+    category: "coffee",
+    title: "Banana Latte",
+    desc: "Латте с ярким вкусом спелого банана.",
+    price: 55,
+    img: "image-22.png",
+    tag: "sweet",
+  },
+]
+
+const drinks: Product[] = [
+  {
+    id: "drink-tea-lemon",
+    category: "drinks",
+    title: "For-L∞ve Tea (Lemon)",
+    desc: "Освежающий чай со льдом, лимоном и мятой.",
+    price: 39,
+    img: "image-15.png",
+    tag: "fresh",
+  },
+  {
+    id: "drink-mojito-na",
+    category: "drinks",
+    title: "Mojito (Non-Alcohol)",
+    desc: "Лайм, мята, лёд — бодрит и освежает.",
+    price: 45,
+    img: "image-14.png",
+    tag: "cool",
+  },
+]
+
+const crepes: Product[] = [
+  {
+    id: "crepe-strawberry",
+    category: "crepes",
+    title: "Crepe Strawberry",
+    desc: "Клубника, крем и сахарная пудра — нежно и ярко.",
+    price: 65,
+    img: "image-16.png",
+    tag: "berry",
+  },
+  {
+    id: "crepe-banana-choco",
+    category: "crepes",
+    title: "Crepe Banana & Choco",
+    desc: "Банан + шоколад, идеальная пара к кофе.",
+    price: 65,
+    img: "image-17.png",
+    tag: "classic",
+  },
+  {
+    id: "crepe-nutella-coconut",
+    category: "crepes",
+    title: "Crepe Nutella & Coconut",
+    desc: "Шоколадная паста, кокос и орехи — сладкий топ.",
+    price: 69,
+    img: "image-18.png",
+    tag: "top",
+  },
+]
+</script>
+
+<style scoped>
+/* твой CSS + добавил интерактив и drawer */
+
+/* BASE */
+.page {
+  min-height: 100vh;
+  padding: 90px 18px 64px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #241b18;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.bg__warm {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1100px 700px at 20% 10%, rgba(255, 228, 214, 0.9), transparent 60%),
+    radial-gradient(900px 600px at 85% 30%, rgba(255, 214, 196, 0.65), transparent 60%),
+    radial-gradient(900px 900px at 45% 100%, rgba(214, 170, 150, 0.35), transparent 60%),
+    linear-gradient(180deg, #fff 0%, #fbf5f1 45%, #f5ede8 100%);
+}
+
+.bg__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.bg__blob {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  filter: blur(40px);
+  opacity: 0.35;
+  border-radius: 999px;
+  transform: translate3d(0, 0, 0);
+}
+
+.bg__blob--1 {
+  left: -140px;
+  top: 120px;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 88, 52, 0.55), transparent 60%);
+  animation: floaty 12s ease-in-out infinite;
+}
+
+.bg__blob--2 {
+  right: -180px;
+  bottom: -140px;
+  background: radial-gradient(circle at 30% 30%, rgba(130, 70, 55, 0.55), transparent 60%);
+  animation: floaty 14s ease-in-out infinite reverse;
+}
+
+@keyframes floaty {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(22px, -18px) scale(1.03);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.head {
+  border-radius: 26px;
+  padding: 26px 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1), 0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  backdrop-filter: blur(10px);
+}
+
+.head__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 800;
+  color: #7a3b2b;
+  font-size: 13px;
+}
+
+.head__title {
+  margin: 14px 0 6px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  color: rgba(233, 68, 68, 0.95);
+  text-shadow: 0 10px 25px rgba(196, 88, 52, 0.25);
+}
+
+.head__text {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0.88;
+}
+
+.head__actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+.btn--primary {
+  background: #b24a4a;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(178, 74, 74, 0.26);
+}
+
+.btn--primary:hover {
+  background: #933737;
+}
+
+.btn--ghost {
+  background: rgba(163, 147, 147, 0.08);
+  color: #111;
+  box-shadow: none;
+}
+
+.btn--ghost:hover {
+  background: rgba(232, 13, 13, 0.12);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.menuGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 14px;
+}
+
+.card {
+  border-radius: 26px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.card--accent {
+  background: radial-gradient(900px 500px at 30% 10%, rgba(196, 88, 52, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.62);
+}
+
+.card__head {
+  margin-bottom: 14px;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.card__subtitle {
+  margin: 6px 0 0;
+  opacity: 0.78;
+  line-height: 1.5;
+}
+
+.right {
+  align-self: start;
+}
+
+.group {
+  margin-top: 14px;
+}
+
+.group__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.group__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(196, 88, 52, 0.12);
+  border: 1px solid rgba(196, 88, 52, 0.18);
+  font-weight: 900;
+  font-size: 12px;
+  color: #7a3b2b;
+}
+
+.group__badge--soft {
+  background: rgba(178, 74, 74, 0.1);
+  border-color: rgba(178, 74, 74, 0.18);
+  color: #7c2f2f;
+}
+
+.group__title {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.items--single {
+  grid-template-columns: 1fr;
+}
+
+.item {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(196, 88, 52, 0.22);
+}
+
+.item__imgWrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.item__imgWrap--big {
+  aspect-ratio: 16 / 11;
+}
+
+.item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 10px;
+}
+
+.item__body {
+  padding: 12px 12px 14px;
+  min-width: 0;
+}
+
+.item__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.item__name {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.item__price {
+  font-weight: 1000;
+  color: #b24a4a;
+  white-space: nowrap;
+}
+
+.item__desc {
+  margin-top: 6px;
+  opacity: 0.82;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.item__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.pill--green {
+  border-color: rgba(56, 134, 86, 0.22);
+  background: rgba(56, 134, 86, 0.08);
+}
+
+.mini {
+  font-size: 12px;
+  font-weight: 1000;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.cta {
+  margin-top: 14px;
+  border-radius: 22px;
+  padding: 14px;
+  background: rgba(178, 74, 74, 0.1);
+  border: 1px solid rgba(178, 74, 74, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.ctaTitle {
+  font-weight: 1000;
+}
+
+.ctaText {
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* BUY BUTTON */
+.buyBtn {
+  margin-left: auto;
+  border: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(178, 74, 74, 0.12);
+  border: 1px solid rgba(178, 74, 74, 0.22);
+  color: #7c2f2f;
+  transition: transform 140ms ease, background 140ms ease;
+}
+.buyBtn:hover {
+  transform: translateY(-1px);
+  background: rgba(178, 74, 74, 0.18);
+}
+.buyBtn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* CART BUTTON BADGE */
+.cartBtn {
+  position: relative;
+}
+.cartBadge {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 1000;
+  background: rgba(178, 74, 74, 0.18);
+  border: 1px solid rgba(178, 74, 74, 0.28);
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%) translateY(14px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.16);
+  backdrop-filter: blur(10px);
+  font-weight: 900;
+}
+.toast[data-show="true"] {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0px);
+  transition: all 160ms ease;
+}
+
+/* DRAWER */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 10, 10, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+.drawer[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.drawerPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(420px, 92vw);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px);
+  border-left: 1px solid rgba(80, 55, 48, 0.14);
+  box-shadow: -18px 0 60px rgba(32, 18, 14, 0.18);
+  transform: translateX(18px);
+  transition: transform 180ms ease;
+  display: flex;
+  flex-direction: column;
+}
+.drawer[data-open="true"] .drawerPanel {
+  transform: translateX(0px);
+}
+
+.drawerTop {
+  padding: 14px 14px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(80, 55, 48, 0.12);
+}
+.drawerTitle {
+  font-weight: 1000;
+  font-size: 18px;
+}
+.iconBtn {
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.drawerList {
+  padding: 12px;
+  overflow: auto;
+  flex: 1;
+  display: grid;
+  gap: 10px;
+}
+.drawerItem {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+}
+.drawerImg {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(80, 55, 48, 0.10);
+  padding: 6px;
+}
+.drawerInfo {
+  min-width: 0;
+}
+.drawerName {
+  font-weight: 1000;
+  line-height: 1.2;
+}
+.drawerSub {
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+.qtyRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.qtyBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-weight: 1000;
+}
+.qtyNum {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 1000;
+}
+.removeBtn {
+  margin-left: auto;
+  border: 1px solid rgba(178, 74, 74, 0.22);
+  background: rgba(178, 74, 74, 0.10);
+  color: #7c2f2f;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.drawerLinePrice {
+  font-weight: 1000;
+  color: #b24a4a;
+  white-space: nowrap;
+  align-self: start;
+  padding-top: 2px;
+}
+
+.empty {
+  padding: 18px;
+  opacity: 0.85;
+}
+.emptyTitle {
+  font-weight: 1000;
+}
+.emptyText {
+  margin-top: 4px;
+}
+
+.drawerBottom {
+  padding: 12px;
+  border-top: 1px solid rgba(80, 55, 48, 0.12);
+}
+.sumRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px 12px;
+  border-radius: 18px;
+  background: rgba(178, 74, 74, 0.08);
+  border: 1px solid rgba(178, 74, 74, 0.16);
+}
+.sumLabel {
+  font-weight: 1000;
+  opacity: 0.85;
+}
+.sumValue {
+  font-weight: 1000;
+  color: #b24a4a;
+}
+
+.drawerActions {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 980px) {
+  .menuGrid {
+    grid-template-columns: 1fr;
+  }
+  .items {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding-top: 90px;
+  }
+  .head {
+    padding: 22px 16px;
+  }
+  .card {
+    padding: 16px;
+  }
+}
+</style>
+
+
+
+смотри мне нужно этот код разделить на маленькие в накст и где поставить все 
