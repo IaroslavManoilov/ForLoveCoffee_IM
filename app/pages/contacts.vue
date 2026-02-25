@@ -303,7 +303,7 @@ useHead({
   ],
 });
 
-// ====== ДАННЫЕ (замени на свои)
+// ====== ДАННЫЕ (можешь менять под себя)
 const phone = "+373 68 514 544";
 const address = "Chișinău, ул. Кофейная, 15";
 const hours = "09:00 – 22:00";
@@ -331,9 +331,20 @@ const mapEmbedSrc = computed(() => {
   return "https://www.openstreetmap.org/export/embed.html?bbox=28.78%2C46.98%2C28.93%2C47.08&layer=mapnik&marker=47.01%2C28.86";
 });
 
+// ✅ ТВОИ СОЦСЕТИ (уже поставил)
 const socials = computed(() => [
-  { title: "Telegram", desc: "Новости и свежая обжарка", href: "https://t.me/your_nick", kind: "telegram" as const },
-  { title: "Instagram", desc: "Эстетика, видео и анонсы", href: "https://instagram.com/your_account", kind: "instagram" as const },
+  {
+    title: "Telegram",
+    desc: "Написать в Telegram",
+    href: "https://t.me/iaroslav_manoilov",
+    kind: "telegram" as const,
+  },
+  {
+    title: "Instagram",
+    desc: "Смотреть в Instagram",
+    href: "https://www.instagram.com/iaroslav_manoilov_?igsh=MXM1cGJxcW51dDNvbg==",
+    kind: "instagram" as const,
+  },
   { title: "Google Maps", desc: "Маршрут в 1 клик", href: mapsHref.value, kind: "map" as const },
 ]);
 
@@ -964,40 +975,32 @@ onBeforeUnmount(() => {
   }
 }
 
-/* ===== Typography fix: заголовки + текст читаемее ===== */
-
-/* Заголовки карточек: "Наши контакты", "Мы в соцсетях", "Загляни к нам" */
+/* ===== Typography fix ===== */
 .card__title {
   color: #b24a4a;
-  /* красный */
   font-weight: 950;
   letter-spacing: -0.02em;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* Подзаголовок ("Быстро, просто, уютно." / "Там — новости...") */
 .card__subtitle {
   color: rgba(36, 27, 24, 0.78);
   font-weight: 700;
 }
 
-/* Общий текст в карточках (на всякий) */
 .card {
   color: rgba(36, 27, 24, 0.92);
 }
 
-/* Лейблы "Телефон / Где мы? / Часы" */
 .item__label {
   color: rgba(36, 27, 24, 0.68);
   font-weight: 800;
 }
 
-/* Значения (номер, адрес, время) */
 .item__value {
   color: rgba(36, 27, 24, 0.92);
 }
 
-/* Ссылки внутри */
 .link {
   color: rgba(36, 27, 24, 0.92);
   border-bottom-color: rgba(178, 74, 74, 0.45);
@@ -1008,20 +1011,17 @@ onBeforeUnmount(() => {
   border-bottom-color: rgba(178, 74, 74, 0.7);
 }
 
-/* Заголовки в соц кнопках (Telegram/Instagram/Google Maps) */
 .social__title {
   color: rgba(36, 27, 24, 0.94);
   font-weight: 950;
 }
 
-/* Описания в соц кнопках */
 .social__desc {
   color: rgba(36, 27, 24, 0.72);
   font-weight: 700;
 }
 
-/* Для "акцентной" карточки можно чуть усилить контраст */
 .card--accent .card__title {
   color: #b24a4a;
 }
-</style>
+</style>npm
