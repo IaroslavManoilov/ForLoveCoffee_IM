@@ -1748,7 +1748,16 @@ html {
   opacity: 0;
   transform: translateY(18px);
   filter: blur(7px);
-  transition: opacity 520ms ease, transform 520ms ease, filter 520ms ease, -webkit-mask-position 700ms ease;
+
+  transition: opacity 520ms ease, transform 520ms ease, filter 520ms ease,
+    mask-position 700ms ease, -webkit-mask-position 700ms ease;
+
+  /* standard */
+  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  mask-size: 220% 100%;
+  mask-position: 120% 0;
+
+  /* webkit */
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
   -webkit-mask-size: 220% 100%;
   -webkit-mask-position: 120% 0;
@@ -1758,6 +1767,11 @@ html {
   opacity: 1;
   transform: translateY(0);
   filter: blur(0);
+
+  /* standard */
+  mask-position: 50% 0;
+
+  /* webkit */
   -webkit-mask-position: 50% 0;
 }
 
