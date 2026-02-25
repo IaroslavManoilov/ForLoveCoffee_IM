@@ -2,148 +2,155 @@
   <div class="page">
     <main class="wrap">
       <section class="card">
-        <div class="top">
-          <div>
+        <header class="header">
+          <div class="hLeft">
             <h1 class="title">Заказы</h1>
             <p class="sub">PostgreSQL (Supabase) через /api/admin/*</p>
           </div>
 
-          <div class="topActions">
+          <div class="hRight">
             <button class="btn btn--ghost" type="button" @click="refreshOrders" :disabled="pending">
               {{ pending ? "..." : "Обновить" }}
             </button>
 
             <button class="btn btn--ghost" type="button" @click="clearAll" :disabled="pending || !orders.length">
-              Очистить все
+              Очистить всё
             </button>
 
             <button class="btn btn--danger" type="button" @click="logout" :disabled="pending">
               Выйти
             </button>
           </div>
-        </div>
+        </header>
 
         <div class="filters">
           <input v-model.trim="filter.q" class="input" placeholder="Поиск: имя / телефон / id" />
 
-          <select v-model="filter.paid" class="input">
-            <option value="all">Все</option>
+          <select v-model="filter.pay" class="input">
+            <option value="all">Все оплаты</option>
             <option value="paid">Оплаченные</option>
             <option value="unpaid">Не оплаченные</option>
           </select>
 
           <select v-model="filter.status" class="input">
             <option value="all">Все статусы</option>
-            <option value="new">Новые</option>
-            <option value="preparing">Готовим</option>
-            <option value="ready">Готовы</option>
-            <option value="done">Выданы</option>
-            <option value="cancelled">Отменены</option>
+            <option v-for="s in STATUS_ORDER" :key="s" :value="s">
+              {{ STATUS_LABEL[s] }}
+            </option>
           </select>
         </div>
 
         <p v-if="errorText" class="error">{{ errorText }}</p>
 
-        <div v-if="!orders.length && !pending" class="empty">Пока нет заказов.</div>
+        <div v-if="!filtered.length && !pending" class="empty">
+          Пока нет заказов.
+        </div>
 
         <div v-else class="list">
-          <div v-for="o in filtered" :key="o.id" class="item">
-            <div class="row">
-              <div class="left">
+          <article v-for="o in filtered" :key="o.id" class="order" :data-open="openId === o.id">
+            <div class="orderTop" @click="toggleOpen(o.id)" role="button" tabindex="0">
+              <div class="topMain">
                 <div class="idRow">
-                  <div class="id">#{{ o.id }}</div>
-                  <div class="chips">
-                    <span class="statusChip" :data-status="o.status">
-                      {{ statusTextMap[o.status] || "Новый" }}
-                    </span>
-                    <span class="paidChip" :data-paid="o.paid">
-                      <span class="dot" :data-paid="o.paid"></span>
-                      {{ o.paid ? "Оплачен" : "Не оплачен" }}
-                    </span>
-                  </div>
+                  <span class="id">#{{ shortId(o.id) }}</span>
+                  <span class="time">{{ formatDate(o.createdAt) }}</span>
+                </div>
+
+                <div class="who">
+                  <span class="name">{{ o.customerName }}</span>
+                  <span class="phone">{{ o.customerPhone }}</span>
                 </div>
 
                 <div class="meta">
-                  {{ formatDate(o.createdAt) }} • {{ o.customerName }} • {{ o.customerPhone }}
+                  <span class="pill" :data-kind="o.deliveryType">
+                    {{ o.deliveryType === "delivery" ? "Доставка" : "Самовывоз" }}
+                  </span>
+
+                  <span class="pill">
+                    Готово за <b>{{ o.prepMinutes }} мин</b> • к <b>{{ formatTime(o.readyAt) }}</b>
+                  </span>
+
+                  <span class="pill">
+                    {{ o.paymentMethod === "cash" ? "Наличные" : "Карта" }}
+                  </span>
+
+                  <span v-if="o.deliveryType === 'delivery'" class="pill">
+                    {{ o.deliveryDistanceKm }} км • {{ o.deliveryFee }} MDL
+                  </span>
+
+                  <span v-if="o.deliveryAddress && o.deliveryType === 'delivery'" class="pill pill--addr">
+                    {{ o.deliveryAddress }}
+                  </span>
                 </div>
 
-                <div class="meta">
-                  Готово через: <b>{{ o.prepMinutes }} мин</b>
-                  • Готово к: <b>{{ formatTime(o.readyAt) }}</b>
-                  • {{ o.deliveryType === "delivery" ? "Доставка" : "Самовывоз" }}
-                  <span v-if="o.deliveryAddress"> • {{ o.deliveryAddress }}</span>
-                </div>
-
-                <div v-if="o.deliveryType === 'delivery'" class="meta">
-                  Доставка: <b>{{ o.deliveryDistanceKm }} км</b> • <b>{{ o.deliveryFee }} MDL</b>
-                </div>
-
-                <div class="meta">
-                  Оплата: <b>{{ o.paymentMethod === "cash" ? "Наличные" : "Карта" }}</b>
-                </div>
-
-                <div v-if="o.comment" class="meta">
-                  Комментарий: <b>{{ o.comment }}</b>
+                <div v-if="o.comment" class="comment">
+                  <span class="commentLabel">Комментарий:</span> {{ o.comment }}
                 </div>
               </div>
 
-              <div class="right">
-                <div class="sum">{{ o.total }} MDL</div>
-                <div class="subsum">Товары: {{ o.subtotal }} MDL</div>
+              <div class="topSide">
+                <div class="total">{{ o.total }} MDL</div>
+
+                <div class="badges">
+                  <span class="badge" :data-paid="String(o.paid)">
+                    <span class="dot" :data-paid="String(o.paid)"></span>
+                    {{ o.paid ? "Оплачен" : "Не оплачен" }}
+                  </span>
+
+                  <span class="badge" :data-status="o.status">
+                    <span class="dot" :data-status="o.status"></span>
+                    {{ statusLabel(o.status) }}
+                  </span>
+                </div>
+
+                <div class="chev" aria-hidden="true">
+                  <span>{{ openId === o.id ? "▲" : "▼" }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="items">
-              <div v-for="i in o.items" :key="i.id" class="miniRow">
-                <span class="miniName">{{ i.title }}</span>
-                <span class="miniMeta">{{ i.qty }}×{{ i.price }}</span>
-                <span class="miniPrice">{{ i.qty * i.price }} MDL</span>
-              </div>
-            </div>
-
-            <div class="actions">
-              <button class="btn" :class="o.paid ? 'btn--ok' : 'btn--primary'" type="button" @click="togglePaid(o)"
-                :disabled="actionPendingId === o.id">
-                <span class="check" :data-on="o.paid">✓</span>
-                {{ o.paid ? "Оплачен" : "Отметить “Оплачен”" }}
-              </button>
-
-              <div class="statusActions">
-                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'new')"
-                  :disabled="actionPendingId === o.id">
-                  Новый
-                </button>
-                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'preparing')"
-                  :disabled="actionPendingId === o.id">
-                  Готовим
-                </button>
-                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'ready')"
-                  :disabled="actionPendingId === o.id">
-                  Готов
-                </button>
-                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'done')"
-                  :disabled="actionPendingId === o.id">
-                  Выдан
-                </button>
-                <button class="btn btn--danger" type="button" @click="setStatus(o, 'cancelled')"
-                  :disabled="actionPendingId === o.id">
-                  Отменить
-                </button>
+            <div v-if="openId === o.id" class="orderBody">
+              <div class="items">
+                <div v-for="i in o.items" :key="i.id" class="itemRow">
+                  <div class="iName">{{ i.title }}</div>
+                  <div class="iQty">{{ i.qty }}×{{ i.price }}</div>
+                  <div class="iSum">{{ i.qty * i.price }} MDL</div>
+                </div>
               </div>
 
-              <NuxtLink class="btn btn--ghost" :to="`/success?orderId=${encodeURIComponent(o.id)}`">
-                Открыть чек
-              </NuxtLink>
+              <div class="actions">
+                <!-- Оплата -->
+                <button class="btn" :class="o.paid ? 'btn--ok' : 'btn--primary'" type="button"
+                  @click.stop="togglePaid(o)" :disabled="actionPendingId === o.id">
+                  {{ o.paid ? "Снять оплату" : "Отметить оплачен" }}
+                </button>
 
-              <button class="btn btn--ghost" type="button" @click="copyReceipt(o)">
-                Скопировать чек
-              </button>
+                <!-- Статус -->
+                <div class="statusBox" @click.stop>
+                  <label class="statusLabel">Статус</label>
+                  <select class="statusSelect" :value="o.status"
+                    @change="onStatusChange(o, ($event.target as HTMLSelectElement).value)"
+                    :disabled="actionPendingId === o.id">
+                    <option v-for="s in STATUS_ORDER" :key="s" :value="s">
+                      {{ STATUS_LABEL[s] }}
+                    </option>
+                  </select>
+                </div>
 
-              <button class="btn btn--danger" type="button" @click="removeOrder(o.id)">
-                Удалить
-              </button>
+                <!-- Чек -->
+                <NuxtLink class="btn btn--ghost" :to="`/success?orderId=${encodeURIComponent(o.id)}`" @click.stop>
+                  Открыть чек
+                </NuxtLink>
+
+                <button class="btn btn--ghost" type="button" @click.stop="copyReceipt(o)">
+                  Скопировать чек
+                </button>
+
+                <button class="btn btn--danger" type="button" @click.stop="removeOrder(o.id)">
+                  Удалить
+                </button>
+              </div>
             </div>
-          </div>
+          </article>
         </div>
 
         <p v-if="toast" class="toast">{{ toast }}</p>
@@ -157,7 +164,7 @@ useHead({ title: "Admin — Orders" })
 
 type OrderItem = { id: string; title: string; price: number; qty: number; category?: string }
 
-type OrderStatus = "new" | "preparing" | "ready" | "done" | "cancelled"
+type OrderStatus = "new" | "preparing" | "ready" | "delivered" | "cancelled"
 
 type ApiOrder = {
   id: string
@@ -179,12 +186,18 @@ type ApiOrder = {
   items: OrderItem[]
 }
 
-const statusTextMap: Record<OrderStatus, string> = {
+const STATUS_LABEL: Record<OrderStatus, string> = {
   new: "Новый",
   preparing: "Готовим",
   ready: "Готов",
-  done: "Выдан",
+  delivered: "Выдан",
   cancelled: "Отменён",
+}
+
+const STATUS_ORDER: OrderStatus[] = ["new", "preparing", "ready", "delivered", "cancelled"]
+
+function statusLabel(s: any) {
+  return STATUS_LABEL[s as OrderStatus] || "Новый"
 }
 
 const toast = ref("")
@@ -194,10 +207,11 @@ function showToast(t: string) {
 }
 
 const actionPendingId = ref("")
+const openId = ref<string>("")
 
 const filter = reactive({
   q: "",
-  paid: "all" as "all" | "paid" | "unpaid",
+  pay: "all" as "all" | "paid" | "unpaid",
   status: "all" as "all" | OrderStatus,
 })
 
@@ -221,7 +235,7 @@ const errorText = computed(() => {
   const e: any = error.value
   if (!e) return ""
   if (e?.statusCode === 401) return "Нет доступа. Перезайди."
-  return "Ошибка загрузки заказов."
+  return e?.data?.statusMessage || e?.statusMessage || "Ошибка загрузки заказов."
 })
 
 function refreshOrders() {
@@ -232,12 +246,13 @@ const filtered = computed(() => {
   const q = filter.q.toLowerCase().trim()
 
   return orders.value.filter((o) => {
-    const byPaid =
-      filter.paid === "all" ? true : filter.paid === "paid" ? o.paid : !o.paid
+    const payOk =
+      filter.pay === "all" ? true : filter.pay === "paid" ? o.paid : !o.paid
 
-    const byStatus = filter.status === "all" ? true : o.status === filter.status
+    const stOk =
+      filter.status === "all" ? true : o.status === filter.status
 
-    if (!byPaid || !byStatus) return false
+    if (!payOk || !stOk) return false
     if (!q) return true
 
     const hay = `${o.id} ${o.customerName} ${o.customerPhone}`.toLowerCase()
@@ -245,12 +260,15 @@ const filtered = computed(() => {
   })
 })
 
+function toggleOpen(id: string) {
+  openId.value = openId.value === id ? "" : id
+}
+
 async function togglePaid(o: ApiOrder) {
   if (actionPendingId.value) return
   actionPendingId.value = o.id
 
   const next = !o.paid
-
   try {
     if (next) {
       await $fetch(`/api/admin/orders/${encodeURIComponent(o.id)}/paid`, {
@@ -273,7 +291,9 @@ async function togglePaid(o: ApiOrder) {
   }
 }
 
-async function setStatus(o: ApiOrder, status: OrderStatus) {
+async function onStatusChange(o: ApiOrder, next: string) {
+  const s = next as any
+  if (o.status === s) return
   if (actionPendingId.value) return
   actionPendingId.value = o.id
 
@@ -281,12 +301,12 @@ async function setStatus(o: ApiOrder, status: OrderStatus) {
     await $fetch(`/api/admin/orders/${encodeURIComponent(o.id)}/status`, {
       method: "PATCH",
       credentials: "include",
-      body: { status },
+      body: { status: s },
     })
-    showToast(`Статус: ${statusTextMap[status]}`)
+    showToast(`Статус: ${statusLabel(s)}`)
     await refresh()
   } catch (e: any) {
-    showToast(e?.data?.statusMessage || e?.statusMessage || "Ошибка")
+    showToast(e?.data?.statusMessage || e?.statusMessage || "Ошибка статуса")
   } finally {
     actionPendingId.value = ""
   }
@@ -317,7 +337,7 @@ async function logout() {
 
 function formatDate(iso: string) {
   try {
-    return new Date(iso).toLocaleString()
+    return new Date(iso).toLocaleString([], { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
   } catch {
     return iso
   }
@@ -331,14 +351,20 @@ function formatTime(iso: string) {
   }
 }
 
+function shortId(id: string) {
+  // чтобы не занимало полэкрана
+  if (!id) return ""
+  return id.length > 8 ? id.slice(0, 8) : id
+}
+
 function copyReceipt(o: ApiOrder) {
   const lines: string[] = []
   lines.push(`For Love Coffee — Чек`)
   lines.push(`Заказ: ${o.id}`)
   lines.push(`Дата: ${formatDate(o.createdAt)}`)
   lines.push(`Клиент: ${o.customerName} (${o.customerPhone})`)
-  lines.push(`Статус: ${statusTextMap[o.status] || o.status}`)
-  lines.push(`Оплата: ${o.paid ? "Оплачен" : "Ожидает оплаты"}`)
+  lines.push(`Оплата: ${o.paid ? "Оплачен" : "Не оплачен"}`)
+  lines.push(`Статус: ${statusLabel(o.status)}`)
   lines.push(`---`)
   for (const i of o.items) lines.push(`${i.title} — ${i.qty}×${i.price} = ${i.qty * i.price} MDL`)
   lines.push(`---`)
@@ -352,29 +378,29 @@ function copyReceipt(o: ApiOrder) {
 <style scoped>
 .page {
   min-height: 100vh;
-  padding: 90px 18px 64px;
+  padding: 92px 18px 64px;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: #241b18;
+  color: #1f1614;
+  background: #f6f0ec;
 }
 
 .wrap {
-  max-width: 1060px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
 .card {
-  border-radius: 26px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(80, 55, 48, 0.12);
-  box-shadow: 0 18px 50px rgba(32, 18, 14, 0.1);
-  backdrop-filter: blur(10px);
+  border-radius: 22px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid rgba(40, 20, 15, 0.10);
+  box-shadow: 0 18px 50px rgba(20, 12, 10, 0.12);
 }
 
-.top {
+.header {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -382,33 +408,36 @@ function copyReceipt(o: ApiOrder) {
 .title {
   margin: 0;
   font-size: 28px;
+  font-weight: 1000;
 }
 
 .sub {
   margin: 6px 0 0;
-  opacity: 0.75;
+  color: rgba(31, 22, 20, 0.75);
+  font-weight: 700;
 }
 
-.topActions {
+.hRight {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
 .filters {
-  margin-top: 12px;
+  margin-top: 14px;
   display: grid;
   grid-template-columns: 1fr 220px 220px;
   gap: 10px;
 }
 
 .input {
-  border-radius: 16px;
-  border: 1px solid rgba(80, 55, 48, 0.14);
-  background: rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  border: 1px solid rgba(40, 20, 15, 0.18);
+  background: #fff;
   padding: 12px 12px;
   outline: none;
   font-weight: 800;
+  color: #1f1614;
 }
 
 .list {
@@ -417,163 +446,238 @@ function copyReceipt(o: ApiOrder) {
   gap: 12px;
 }
 
-.item {
-  border-radius: 22px;
+.order {
+  border-radius: 18px;
+  border: 1px solid rgba(40, 20, 15, 0.14);
+  background: #fff;
+  overflow: hidden;
+}
+
+.orderTop {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 12px;
   padding: 14px;
-  border: 1px solid rgba(80, 55, 48, 0.12);
-  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
 }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.left {
+.topMain {
   min-width: 0;
 }
 
 .idRow {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: baseline;
   gap: 10px;
-  flex-wrap: wrap;
 }
 
 .id {
   font-weight: 1000;
+  letter-spacing: 0.2px;
 }
 
-.chips {
-  display: inline-flex;
-  gap: 8px;
+.time {
+  color: rgba(31, 22, 20, 0.65);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.who {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.meta {
-  margin-top: 3px;
-  font-size: 12px;
-  opacity: 0.78;
-}
-
-.right {
-  text-align: right;
-  min-width: 140px;
-}
-
-.sum {
+.name {
   font-weight: 1000;
-  color: #b24a4a;
-  font-size: 16px;
 }
 
-.subsum {
-  margin-top: 4px;
+.phone {
+  color: rgba(31, 22, 20, 0.75);
+  font-weight: 800;
+}
+
+.meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(40, 20, 15, 0.14);
+  background: rgba(246, 240, 236, 0.6);
   font-weight: 900;
   font-size: 12px;
-  opacity: 0.7;
+  color: #1f1614;
 }
 
-.statusChip {
-  display: inline-flex;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 1000;
-  font-size: 12px;
-  border: 1px solid rgba(80, 55, 48, 0.12);
-  background: rgba(255, 255, 255, 0.65);
+.pill[data-kind="delivery"] {
+  border-color: rgba(178, 74, 74, 0.25);
+  background: rgba(178, 74, 74, 0.10);
 }
 
-.statusChip[data-status="new"] {
-  background: #eef2ff;
-  color: #3730a3;
-  border-color: rgba(55, 48, 163, 0.18);
-}
-
-.statusChip[data-status="preparing"] {
-  background: #fff7ed;
-  color: #9a3412;
-  border-color: rgba(154, 52, 18, 0.18);
-}
-
-.statusChip[data-status="ready"] {
-  background: #ecfeff;
-  color: #155e75;
-  border-color: rgba(21, 94, 117, 0.18);
-}
-
-.statusChip[data-status="done"] {
-  background: #ecfdf5;
-  color: #065f46;
-  border-color: rgba(6, 95, 70, 0.18);
-}
-
-.statusChip[data-status="cancelled"] {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: rgba(153, 27, 27, 0.18);
-}
-
-.paidChip {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 1000;
-  font-size: 12px;
-  border: 1px solid rgba(80, 55, 48, 0.12);
-  background: rgba(255, 255, 255, 0.65);
-}
-
-.paidChip[data-paid="true"] {
-  border-color: rgba(56, 134, 86, 0.22);
-  background: rgba(56, 134, 86, 0.1);
-  color: #1f5a38;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  display: inline-block;
-  margin-right: 8px;
-  background: rgba(178, 74, 74, 0.55);
-}
-
-.dot[data-paid="true"] {
-  background: rgba(56, 134, 86, 0.9);
-}
-
-.items {
-  margin-top: 10px;
-  display: grid;
-  gap: 6px;
-}
-
-.miniRow {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 12px;
-  opacity: 0.92;
-}
-
-.miniName {
+.pill--addr {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.miniMeta {
-  opacity: 0.75;
+.comment {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(40, 20, 15, 0.12);
+  background: #faf7f5;
+  font-weight: 800;
+}
+
+.commentLabel {
+  font-weight: 1000;
+}
+
+.topSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.total {
+  font-weight: 1100;
+  font-size: 18px;
+  color: #b24a4a;
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(40, 20, 15, 0.14);
+  background: #fff;
+  font-weight: 1000;
+  font-size: 12px;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #999;
+}
+
+/* paid */
+.badge[data-paid="true"] {
+  border-color: rgba(32, 120, 72, 0.30);
+  background: rgba(32, 120, 72, 0.10);
+}
+
+.dot[data-paid="true"] {
+  background: rgba(32, 120, 72, 0.95);
+}
+
+.dot[data-paid="false"] {
+  background: rgba(178, 74, 74, 0.95);
+}
+
+/* status colors */
+.badge[data-status="new"] {
+  background: rgba(35, 86, 190, 0.10);
+  border-color: rgba(35, 86, 190, 0.28);
+}
+
+.dot[data-status="new"] {
+  background: rgba(35, 86, 190, 0.95);
+}
+
+.badge[data-status="preparing"] {
+  background: rgba(184, 120, 24, 0.10);
+  border-color: rgba(184, 120, 24, 0.28);
+}
+
+.dot[data-status="preparing"] {
+  background: rgba(184, 120, 24, 0.95);
+}
+
+.badge[data-status="ready"] {
+  background: rgba(32, 120, 72, 0.10);
+  border-color: rgba(32, 120, 72, 0.28);
+}
+
+.dot[data-status="ready"] {
+  background: rgba(32, 120, 72, 0.95);
+}
+
+.badge[data-status="delivered"] {
+  background: rgba(18, 18, 18, 0.08);
+  border-color: rgba(18, 18, 18, 0.18);
+}
+
+.dot[data-status="delivered"] {
+  background: rgba(18, 18, 18, 0.75);
+}
+
+.badge[data-status="cancelled"] {
+  background: rgba(178, 74, 74, 0.10);
+  border-color: rgba(178, 74, 74, 0.28);
+}
+
+.dot[data-status="cancelled"] {
+  background: rgba(178, 74, 74, 0.95);
+}
+
+.chev {
+  color: rgba(31, 22, 20, 0.65);
+  font-weight: 1000;
+}
+
+.orderBody {
+  border-top: 1px solid rgba(40, 20, 15, 0.12);
+  padding: 14px;
+  background: #faf7f5;
+}
+
+.items {
+  display: grid;
+  gap: 8px;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(40, 20, 15, 0.10);
+  font-weight: 900;
+}
+
+.iName {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.miniPrice {
+.iQty {
+  color: rgba(31, 22, 20, 0.70);
+}
+
+.iSum {
   color: #b24a4a;
   white-space: nowrap;
 }
@@ -583,27 +687,18 @@ function copyReceipt(o: ApiOrder) {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  align-items: center;
-}
-
-.statusActions {
-  display: inline-flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: none;
+  border: 0;
   cursor: pointer;
   border-radius: 999px;
-  padding: 12px 18px;
-  font-weight: 900;
+  padding: 12px 16px;
+  font-weight: 1000;
   font-size: 14px;
-  background: rgba(0, 0, 0, 0.08);
-  color: #111;
+  background: rgba(0, 0, 0, 0.06);
+  color: #1f1614;
   text-decoration: none;
 }
 
@@ -613,76 +708,79 @@ function copyReceipt(o: ApiOrder) {
 }
 
 .btn--ghost {
-  background: rgba(163, 147, 147, 0.08);
+  background: rgba(31, 22, 20, 0.06);
 }
 
 .btn--danger {
   background: rgba(178, 74, 74, 0.14);
-  border: 1px solid rgba(178, 74, 74, 0.22);
+  border: 1px solid rgba(178, 74, 74, 0.28);
 }
 
 .btn--ok {
-  background: rgba(56, 134, 86, 0.14);
-  border: 1px solid rgba(56, 134, 86, 0.22);
-  color: #1f5a38;
+  background: rgba(32, 120, 72, 0.14);
+  border: 1px solid rgba(32, 120, 72, 0.28);
+  color: #165a34;
 }
 
-.check {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  border: 1px solid rgba(80, 55, 48, 0.18);
-  background: rgba(255, 255, 255, 0.65);
+.statusBox {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(40, 20, 15, 0.14);
+  background: #fff;
+}
+
+.statusLabel {
+  font-size: 11px;
   font-weight: 1000;
-  font-size: 12px;
-  opacity: 0.35;
+  color: rgba(31, 22, 20, 0.70);
 }
 
-.check[data-on="true"] {
-  opacity: 1;
-  border-color: rgba(56, 134, 86, 0.45);
-  background: rgba(56, 134, 86, 0.18);
-  color: #1f5a38;
+.statusSelect {
+  border-radius: 12px;
+  border: 1px solid rgba(40, 20, 15, 0.18);
+  padding: 10px 10px;
+  font-weight: 1000;
+  outline: none;
 }
 
 .empty {
   margin-top: 14px;
   padding: 14px;
   border-radius: 18px;
-  border: 1px solid rgba(80, 55, 48, 0.12);
-  background: rgba(255, 255, 255, 0.6);
-  font-weight: 900;
-  opacity: 0.8;
+  border: 1px solid rgba(40, 20, 15, 0.12);
+  background: #faf7f5;
+  font-weight: 1000;
 }
 
 .toast {
   margin-top: 12px;
   font-weight: 1000;
-  color: #2f7c4c;
+  color: #165a34;
 }
 
 .error {
   margin-top: 10px;
-  font-weight: 900;
+  font-weight: 1000;
   color: #b24a4a;
 }
 
 @media (max-width: 980px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .right {
-    text-align: left;
-  }
-}
-
-@media (max-width: 860px) {
   .filters {
     grid-template-columns: 1fr;
+  }
+
+  .orderTop {
+    grid-template-columns: 1fr;
+  }
+
+  .topSide {
+    align-items: flex-start;
+  }
+
+  .badges {
+    align-items: flex-start;
   }
 }
 </style>
