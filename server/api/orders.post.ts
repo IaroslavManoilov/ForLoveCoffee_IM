@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
   const changeDue = body?.changeDue == null ? null : Number(body.changeDue)
 
   const comment = String(body?.comment ?? "")
-
   const items: OrderItem[] = Array.isArray(body?.items) ? body.items : []
 
   if (!customerName) throw createError({ statusCode: 400, statusMessage: "Missing customerName" })
@@ -63,14 +62,22 @@ export default defineEventHandler(async (event) => {
   await transaction(async () => {
     await run(
       `INSERT INTO orders (
-        id, createdAt,
-        customerName, customerPhone,
-        deliveryType, deliveryAddress, deliveryDistanceKm, deliveryFee,
-        prepMinutes, readyAt,
-        paymentMethod, paid,
-        changeFrom, changeDue,
+        id, "createdAt",
+        "customerName", "customerPhone",
+        "deliveryType", "deliveryAddress", "deliveryDistanceKm", "deliveryFee",
+        "prepMinutes", "readyAt",
+        "paymentMethod", paid,
+        "changeFrom", "changeDue",
         comment, subtotal, total
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (
+        $1,$2,
+        $3,$4,
+        $5,$6,$7,$8,
+        $9,$10,
+        $11,$12,
+        $13,$14,
+        $15,$16,$17
+      )`,
       [
         id,
         createdAt,
@@ -83,7 +90,7 @@ export default defineEventHandler(async (event) => {
         Math.round(prepMinutes),
         readyAt,
         paymentMethod,
-        0,
+        false,
         changeFrom == null ? null : Math.round(changeFrom),
         changeDue == null ? null : Math.round(changeDue),
         comment || "",
@@ -94,8 +101,8 @@ export default defineEventHandler(async (event) => {
 
     for (const i of normalized) {
       await run(
-        `INSERT INTO order_items (orderId, id, title, price, qty, category)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO order_items ("orderId", id, title, price, qty, category)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
         [id, i.id, i.title, Math.round(i.price), Math.round(i.qty), i.category]
       )
     }

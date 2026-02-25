@@ -6,19 +6,29 @@ export default defineEventHandler(async (event) => {
 
   const { all } = await getDb()
 
-  const orders = await all(`SELECT * FROM orders ORDER BY datetime(createdAt) DESC`)
+  // В Postgres с camelCase колонками — обязательно "createdAt"
+  const orders = await all(
+    `SELECT *
+     FROM public.orders
+     ORDER BY "createdAt" DESC`
+  )
+
   if (!orders.length) return { ok: true, orders: [] }
 
-  const ids = orders.map((o: any) => o.id)
-  const placeholders = ids.map(() => "?").join(",")
+  const ids = orders.map((o: any) => String(o.id))
+
+  // $1, $2, $3... (а не ?)
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(",")
 
   const items = await all(
-    `SELECT * FROM order_items WHERE orderId IN (${placeholders})`,
+    `SELECT *
+     FROM public.order_items
+     WHERE "orderId" IN (${placeholders})`,
     ids
   )
 
   const byOrder: Record<string, any[]> = {}
-  for (const it of items) {
+  for (const it of items as any[]) {
     const k = String(it.orderId)
     ;(byOrder[k] ||= []).push({
       id: String(it.id),
@@ -31,7 +41,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     ok: true,
-    orders: orders.map((o: any) => ({
+    orders: (orders as any[]).map((o) => ({
       id: String(o.id),
       createdAt: String(o.createdAt),
       customerName: String(o.customerName),
@@ -43,15 +53,12 @@ export default defineEventHandler(async (event) => {
       prepMinutes: Number(o.prepMinutes ?? 0),
       readyAt: String(o.readyAt),
       paymentMethod: o.paymentMethod === "card" ? "card" : "cash",
-      paid: Number(o.paid) === 1,
+      paid: Boolean(o.paid),
+      status: String(o.status ?? "new"), // ✅ если добавил status
       comment: String(o.comment ?? ""),
       subtotal: Number(o.subtotal ?? 0),
       total: Number(o.total ?? 0),
       items: byOrder[String(o.id)] || [],
     })),
   }
-
-
-
-});
-
+})

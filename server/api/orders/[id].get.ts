@@ -7,32 +7,32 @@ export default defineEventHandler(async (event) => {
 
   const { get, all } = await getDb()
 
-  const order = await get(`SELECT * FROM orders WHERE id = ?`, [id])
+  const order = await get<any>(`SELECT * FROM orders WHERE id = $1`, [id])
   if (!order) throw createError({ statusCode: 404, statusMessage: "Order not found" })
 
-  const items = await all(`SELECT * FROM order_items WHERE "orderId" = ?`, [id])
+  const items = await all<any>(`SELECT * FROM order_items WHERE "orderId" = $1`, [id])
 
   return {
     ok: true,
     order: {
-      id: String((order as any).id),
-      createdAt: String((order as any).createdAt),
-      customerName: String((order as any).customerName),
-      customerPhone: String((order as any).customerPhone),
-      deliveryType: (order as any).deliveryType === "delivery" ? "delivery" : "pickup",
-      deliveryAddress: String((order as any).deliveryAddress ?? ""),
-      deliveryDistanceKm: Number((order as any).deliveryDistanceKm ?? 0),
-      deliveryFee: Number((order as any).deliveryFee ?? 0),
-      prepMinutes: Number((order as any).prepMinutes ?? 0),
-      readyAt: String((order as any).readyAt),
-      paymentMethod: (order as any).paymentMethod === "card" ? "card" : "cash",
-      paid: Boolean((order as any).paid) || Number((order as any).paid) === 1,
-      changeFrom: (order as any).changeFrom == null ? null : Number((order as any).changeFrom),
-      changeDue: (order as any).changeDue == null ? null : Number((order as any).changeDue),
-      comment: String((order as any).comment ?? ""),
-      subtotal: Number((order as any).subtotal ?? 0),
-      total: Number((order as any).total ?? 0),
-      items: (items as any[]).map((i) => ({
+      id: String(order.id),
+      createdAt: String(order.createdAt),
+      customerName: String(order.customerName),
+      customerPhone: String(order.customerPhone),
+      deliveryType: order.deliveryType === "delivery" ? "delivery" : "pickup",
+      deliveryAddress: String(order.deliveryAddress ?? ""),
+      deliveryDistanceKm: Number(order.deliveryDistanceKm ?? 0),
+      deliveryFee: Number(order.deliveryFee ?? 0),
+      prepMinutes: Number(order.prepMinutes ?? 0),
+      readyAt: String(order.readyAt),
+      paymentMethod: order.paymentMethod === "card" ? "card" : "cash",
+      paid: Boolean(order.paid),
+      changeFrom: order.changeFrom == null ? null : Number(order.changeFrom),
+      changeDue: order.changeDue == null ? null : Number(order.changeDue),
+      comment: String(order.comment ?? ""),
+      subtotal: Number(order.subtotal ?? 0),
+      total: Number(order.total ?? 0),
+      items: items.map((i: any) => ({
         id: String(i.id),
         title: String(i.title),
         price: Number(i.price),

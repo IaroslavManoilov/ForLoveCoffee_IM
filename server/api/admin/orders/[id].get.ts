@@ -7,10 +7,10 @@ export default defineEventHandler(async (event) => {
 
   const { get, all } = await getDb()
 
-  const order = await get(`SELECT * FROM orders WHERE id = ?`, [id])
+  const order = await get<any>(`SELECT * FROM orders WHERE id = $1`, [id])
   if (!order) throw createError({ statusCode: 404, statusMessage: "Order not found" })
 
-  const items = await all(`SELECT * FROM order_items WHERE orderId = ?`, [id])
+  const items = await all<any>(`SELECT * FROM order_items WHERE "orderId" = $1`, [id])
 
   return {
     ok: true,
@@ -26,7 +26,10 @@ export default defineEventHandler(async (event) => {
       prepMinutes: Number(order.prepMinutes ?? 0),
       readyAt: String(order.readyAt),
       paymentMethod: order.paymentMethod === "card" ? "card" : "cash",
-      paid: Number(order.paid) === 1,
+
+      // в Supabase paid boolean
+      paid: Boolean(order.paid),
+
       changeFrom: order.changeFrom == null ? null : Number(order.changeFrom),
       changeDue: order.changeDue == null ? null : Number(order.changeDue),
       comment: String(order.comment ?? ""),

@@ -1,20 +1,17 @@
 import { createError } from "h3"
 import { getDb } from "~~/server/utils/db"
-import { requireAdmin } from "~~/server/utils/requireAdmin"
 
 export default defineEventHandler(async (event) => {
-  requireAdmin(event)
-
-  if (event.method !== "PATCH") {
-    throw createError({ statusCode: 405, statusMessage: "Method Not Allowed" })
-  }
-
-  const id = String(event.context.params?.id || "")
+  const id = String(event.context.params?.id || "").trim()
   if (!id) throw createError({ statusCode: 400, statusMessage: "Missing id" })
 
   const { run } = await getDb()
-  const res = await run(`UPDATE orders SET paid = 0 WHERE id = ?`, [id])
 
-  if (!res.changes) throw createError({ statusCode: 404, statusMessage: "Order not found" })
+  const rows = await run(`UPDATE orders SET paid = false WHERE id = $1 RETURNING id`, [id])
+
+  if (!rows || rows.length === 0) {
+    throw createError({ statusCode: 404, statusMessage: "Order not found" })
+  }
+
   return { ok: true }
 })

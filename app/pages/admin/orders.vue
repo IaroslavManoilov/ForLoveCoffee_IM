@@ -5,7 +5,7 @@
         <div class="top">
           <div>
             <h1 class="title">Заказы</h1>
-            <p class="sub">Серверная база (SQLite) через /api/admin/*</p>
+            <p class="sub">PostgreSQL (Supabase) через /api/admin/*</p>
           </div>
 
           <div class="topActions">
@@ -25,10 +25,20 @@
 
         <div class="filters">
           <input v-model.trim="filter.q" class="input" placeholder="Поиск: имя / телефон / id" />
-          <select v-model="filter.status" class="input">
+
+          <select v-model="filter.paid" class="input">
             <option value="all">Все</option>
             <option value="paid">Оплаченные</option>
             <option value="unpaid">Не оплаченные</option>
+          </select>
+
+          <select v-model="filter.status" class="input">
+            <option value="all">Все статусы</option>
+            <option value="new">Новые</option>
+            <option value="preparing">Готовим</option>
+            <option value="ready">Готовы</option>
+            <option value="done">Выданы</option>
+            <option value="cancelled">Отменены</option>
           </select>
         </div>
 
@@ -40,7 +50,18 @@
           <div v-for="o in filtered" :key="o.id" class="item">
             <div class="row">
               <div class="left">
-                <div class="id">#{{ o.id }}</div>
+                <div class="idRow">
+                  <div class="id">#{{ o.id }}</div>
+                  <div class="chips">
+                    <span class="statusChip" :data-status="o.status">
+                      {{ statusTextMap[o.status] || "Новый" }}
+                    </span>
+                    <span class="paidChip" :data-paid="o.paid">
+                      <span class="dot" :data-paid="o.paid"></span>
+                      {{ o.paid ? "Оплачен" : "Не оплачен" }}
+                    </span>
+                  </div>
+                </div>
 
                 <div class="meta">
                   {{ formatDate(o.createdAt) }} • {{ o.customerName }} • {{ o.customerPhone }}
@@ -68,12 +89,7 @@
 
               <div class="right">
                 <div class="sum">{{ o.total }} MDL</div>
-
-                <!-- статус справа -->
-                <div class="badge" :data-paid="o.paid">
-                  <span class="dot" :data-paid="o.paid"></span>
-                  {{ o.paid ? "Оплачен" : "Ожидает оплаты" }}
-                </div>
+                <div class="subsum">Товары: {{ o.subtotal }} MDL</div>
               </div>
             </div>
 
@@ -91,6 +107,29 @@
                 <span class="check" :data-on="o.paid">✓</span>
                 {{ o.paid ? "Оплачен" : "Отметить “Оплачен”" }}
               </button>
+
+              <div class="statusActions">
+                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'new')"
+                  :disabled="actionPendingId === o.id">
+                  Новый
+                </button>
+                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'preparing')"
+                  :disabled="actionPendingId === o.id">
+                  Готовим
+                </button>
+                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'ready')"
+                  :disabled="actionPendingId === o.id">
+                  Готов
+                </button>
+                <button class="btn btn--ghost" type="button" @click="setStatus(o, 'done')"
+                  :disabled="actionPendingId === o.id">
+                  Выдан
+                </button>
+                <button class="btn btn--danger" type="button" @click="setStatus(o, 'cancelled')"
+                  :disabled="actionPendingId === o.id">
+                  Отменить
+                </button>
+              </div>
 
               <NuxtLink class="btn btn--ghost" :to="`/success?orderId=${encodeURIComponent(o.id)}`">
                 Открыть чек
@@ -117,6 +156,9 @@
 useHead({ title: "Admin — Orders" })
 
 type OrderItem = { id: string; title: string; price: number; qty: number; category?: string }
+
+type OrderStatus = "new" | "preparing" | "ready" | "done" | "cancelled"
+
 type ApiOrder = {
   id: string
   createdAt: string
@@ -130,23 +172,33 @@ type ApiOrder = {
   readyAt: string
   paymentMethod: "cash" | "card"
   paid: boolean
+  status: OrderStatus
   comment: string
   subtotal: number
   total: number
   items: OrderItem[]
 }
 
+const statusTextMap: Record<OrderStatus, string> = {
+  new: "Новый",
+  preparing: "Готовим",
+  ready: "Готов",
+  done: "Выдан",
+  cancelled: "Отменён",
+}
+
 const toast = ref("")
 function showToast(t: string) {
   toast.value = t
-  setTimeout(() => (toast.value = ""), 1500)
+  setTimeout(() => (toast.value = ""), 1600)
 }
 
 const actionPendingId = ref("")
 
 const filter = reactive({
   q: "",
-  status: "all" as "all" | "paid" | "unpaid",
+  paid: "all" as "all" | "paid" | "unpaid",
+  status: "all" as "all" | OrderStatus,
 })
 
 onMounted(async () => {
@@ -180,10 +232,12 @@ const filtered = computed(() => {
   const q = filter.q.toLowerCase().trim()
 
   return orders.value.filter((o) => {
-    const byStatus =
-      filter.status === "all" ? true : filter.status === "paid" ? o.paid : !o.paid
+    const byPaid =
+      filter.paid === "all" ? true : filter.paid === "paid" ? o.paid : !o.paid
 
-    if (!byStatus) return false
+    const byStatus = filter.status === "all" ? true : o.status === filter.status
+
+    if (!byPaid || !byStatus) return false
     if (!q) return true
 
     const hay = `${o.id} ${o.customerName} ${o.customerPhone}`.toLowerCase()
@@ -211,8 +265,26 @@ async function togglePaid(o: ApiOrder) {
       })
       showToast("Снято с оплаты")
     }
+    await refresh()
+  } catch (e: any) {
+    showToast(e?.data?.statusMessage || e?.statusMessage || "Ошибка")
+  } finally {
+    actionPendingId.value = ""
+  }
+}
 
-    await refresh() // ✅ перезагрузить список, чтобы UI и фильтры были корректны
+async function setStatus(o: ApiOrder, status: OrderStatus) {
+  if (actionPendingId.value) return
+  actionPendingId.value = o.id
+
+  try {
+    await $fetch(`/api/admin/orders/${encodeURIComponent(o.id)}/status`, {
+      method: "PATCH",
+      credentials: "include",
+      body: { status },
+    })
+    showToast(`Статус: ${statusTextMap[status]}`)
+    await refresh()
   } catch (e: any) {
     showToast(e?.data?.statusMessage || e?.statusMessage || "Ошибка")
   } finally {
@@ -265,7 +337,8 @@ function copyReceipt(o: ApiOrder) {
   lines.push(`Заказ: ${o.id}`)
   lines.push(`Дата: ${formatDate(o.createdAt)}`)
   lines.push(`Клиент: ${o.customerName} (${o.customerPhone})`)
-  lines.push(`Статус: ${o.paid ? "Оплачен" : "Ожидает оплаты"}`)
+  lines.push(`Статус: ${statusTextMap[o.status] || o.status}`)
+  lines.push(`Оплата: ${o.paid ? "Оплачен" : "Ожидает оплаты"}`)
   lines.push(`---`)
   for (const i of o.items) lines.push(`${i.title} — ${i.qty}×${i.price} = ${i.qty * i.price} MDL`)
   lines.push(`---`)
@@ -285,7 +358,7 @@ function copyReceipt(o: ApiOrder) {
 }
 
 .wrap {
-  max-width: 980px;
+  max-width: 1060px;
   margin: 0 auto;
 }
 
@@ -325,7 +398,7 @@ function copyReceipt(o: ApiOrder) {
 .filters {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: 1fr 220px;
+  grid-template-columns: 1fr 220px 220px;
   gap: 10px;
 }
 
@@ -335,7 +408,7 @@ function copyReceipt(o: ApiOrder) {
   background: rgba(255, 255, 255, 0.7);
   padding: 12px 12px;
   outline: none;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .list {
@@ -354,11 +427,30 @@ function copyReceipt(o: ApiOrder) {
 .row {
   display: flex;
   justify-content: space-between;
+  gap: 14px;
+}
+
+.left {
+  min-width: 0;
+}
+
+.idRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .id {
   font-weight: 1000;
+}
+
+.chips {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .meta {
@@ -369,17 +461,24 @@ function copyReceipt(o: ApiOrder) {
 
 .right {
   text-align: right;
+  min-width: 140px;
 }
 
 .sum {
   font-weight: 1000;
   color: #b24a4a;
+  font-size: 16px;
 }
 
-.badge {
+.subsum {
+  margin-top: 4px;
+  font-weight: 900;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.statusChip {
   display: inline-flex;
-  align-items: center;
-  margin-top: 6px;
   padding: 6px 10px;
   border-radius: 999px;
   font-weight: 1000;
@@ -388,9 +487,51 @@ function copyReceipt(o: ApiOrder) {
   background: rgba(255, 255, 255, 0.65);
 }
 
-.badge[data-paid="true"] {
+.statusChip[data-status="new"] {
+  background: #eef2ff;
+  color: #3730a3;
+  border-color: rgba(55, 48, 163, 0.18);
+}
+
+.statusChip[data-status="preparing"] {
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: rgba(154, 52, 18, 0.18);
+}
+
+.statusChip[data-status="ready"] {
+  background: #ecfeff;
+  color: #155e75;
+  border-color: rgba(21, 94, 117, 0.18);
+}
+
+.statusChip[data-status="done"] {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: rgba(6, 95, 70, 0.18);
+}
+
+.statusChip[data-status="cancelled"] {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: rgba(153, 27, 27, 0.18);
+}
+
+.paidChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 1000;
+  font-size: 12px;
+  border: 1px solid rgba(80, 55, 48, 0.12);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.paidChip[data-paid="true"] {
   border-color: rgba(56, 134, 86, 0.22);
   background: rgba(56, 134, 86, 0.1);
+  color: #1f5a38;
 }
 
 .dot {
@@ -429,6 +570,7 @@ function copyReceipt(o: ApiOrder) {
 
 .miniMeta {
   opacity: 0.75;
+  white-space: nowrap;
 }
 
 .miniPrice {
@@ -440,6 +582,13 @@ function copyReceipt(o: ApiOrder) {
   margin-top: 12px;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.statusActions {
+  display: inline-flex;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -519,6 +668,16 @@ function copyReceipt(o: ApiOrder) {
   margin-top: 10px;
   font-weight: 900;
   color: #b24a4a;
+}
+
+@media (max-width: 980px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .right {
+    text-align: left;
+  }
 }
 
 @media (max-width: 860px) {
