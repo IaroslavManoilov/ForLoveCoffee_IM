@@ -24,40 +24,7 @@
     </div>
 
     <!-- TOPBAR -->
-    <header class="topbar" :class="{ 'topbar--scrolled': scrolled }">
-      <div class="topbar__inner">
-        <div class="logo" @click="scrollTo('top')">
-          <span class="logo__dot" aria-hidden="true"></span>
-          <span class="logo__txt">For-L</span>
-          <span class="logo__infBox" aria-hidden="true">
-            <img class="logo__inf" :src="infLogo" alt="" />
-          </span>
-          <span class="logo__txt">ve</span>
-          <span class="logo__sub">coffee</span>
-        </div>
-
-        <nav class="nav" aria-label="Навигация">
-          <button class="nav__link" type="button" @click="scrollTo('showcase')">Витрина</button>
-          <button class="nav__link" type="button" @click="scrollTo('desserts')">Десерты</button>
-          <button class="nav__link" type="button" @click="scrollTo('about')">О нас</button>
-          <button class="nav__link" type="button" @click="scrollTo('contacts')">Контакты</button>
-        </nav>
-
-        <!-- RIGHT: только виджет статуса (кнопки убраны) -->
-        <div class="topbar__right">
-          <div class="openWidget" :class="isOpen ? 'openWidget--open' : 'openWidget--closed'">
-            <span class="openWidget__dot" aria-hidden="true"></span>
-            <span class="openWidget__text">{{ statusText }}</span>
-            <span class="openWidget__meta">{{ timeHint }}</span>
-          </div>
-        </div>
-
-        <!-- Scroll progress -->
-        <div class="topbar__progress" aria-hidden="true">
-          <i :style="{ transform: `scaleX(${scrollProgress})` }"></i>
-        </div>
-      </div>
-    </header>
+    
 
     <!-- STAGE -->
     <section class="stage" id="top">
@@ -2487,6 +2454,7 @@ html {
     --header-h: 98px;
   }
 }
+
 
 
 </style>
