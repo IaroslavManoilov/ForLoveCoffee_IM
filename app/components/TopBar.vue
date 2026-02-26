@@ -1,11 +1,12 @@
 <template>
-  <header class="topbar">
+  <header class="topbar" :class="{ 'is-open': mobileOpen }">
     <div class="topbar__inner">
-      <NuxtLink class="logo" to="/" aria-label="Home">
+      <!-- Left: Logo -->
+      <NuxtLink class="logo" to="/" aria-label="Home" @click="closeMobile">
         <img :src="topLogo" alt="For-love coffee" />
       </NuxtLink>
 
-      <!-- Desktop -->
+      <!-- Desktop nav -->
       <nav class="nav nav--desktop" aria-label="Main navigation">
         <NuxtLink class="nav__link" to="/" exact>Главная</NuxtLink>
         <NuxtLink class="nav__link" to="/about">Про нас</NuxtLink>
@@ -24,18 +25,16 @@
         </NuxtLink>
       </nav>
 
-      <!-- Mobile -->
-      <div class="nav nav--mobile">
-        <button class="iconBtn" type="button" @click="goCheckout" aria-label="Checkout">
+      <!-- Mobile actions -->
+      <div class="nav nav--mobile" aria-label="Mobile actions">
+        <button class="iconBtn iconBtn--mini" type="button" @click="goCheckout" aria-label="Cart">
           🛒
           <span v-if="totalQty" class="badge" aria-live="polite">{{ totalQty }}</span>
         </button>
 
-        <NuxtLink class="adminBtn" to="/admin/login" aria-label="Admin">
-          <span class="adminIcon">👤</span>
-          <span class="lock" :data-ok="isAdminAuthed ? '1' : '0'">
-            {{ isAdminAuthed ? "🔓" : "🔒" }}
-          </span>
+        <NuxtLink class="iconBtn iconBtn--mini" to="/admin/login" aria-label="Admin" @click="closeMobile">
+          👤
+          <span class="lockMini">{{ isAdminAuthed ? "🔓" : "🔒" }}</span>
         </NuxtLink>
 
         <button class="burger" type="button" :aria-expanded="mobileOpen ? 'true' : 'false'" aria-label="Menu"
@@ -127,120 +126,105 @@ watch(
 </script>
 
 <style scoped>
-/* === Размеры топбара (меняешь только тут) === */
+/* =========================================
+   MOBILE FIRST (телефон) — компактная капсула
+   ========================================= */
+
 .topbar {
-  --topbar-offset: 12px;
-  /* отступ сверху */
-  --topbar-h: 84px;
-  /* было 110px */
+  --offset: 10px;
+  --h: 64px;
 
   position: fixed;
-  top: var(--topbar-offset);
+  top: calc(var(--offset) + env(safe-area-inset-top));
   left: 0;
   right: 0;
-  width: 100%;
-  height: var(--topbar-h);
   z-index: 3000;
 
-  /* ✅ фикс уезда вправо */
-  transform: none;
-  overflow-x: visible;
-
-  background: rgba(235, 235, 235, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+  display: grid;
+  place-items: center;
 }
 
 .topbar__inner {
-  height: 100%;
-  width: 100%;
-  padding: 0 clamp(16px, 4vw, 60px);
+  height: var(--h);
+  width: min(520px, calc(100% - 18px));
+  margin-inline: auto;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
+
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(80, 55, 48, 0.14);
+  box-shadow: 0 14px 34px rgba(32, 18, 14, 0.14);
+  border-radius: 999px;
+
+  padding-left: calc(12px + env(safe-area-inset-left));
+  padding-right: calc(12px + env(safe-area-inset-right));
   box-sizing: border-box;
 }
 
+/* logo */
 .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 140px;
-  /* было 160px */
   height: 100%;
-  cursor: pointer;
   text-decoration: none;
+  flex: 0 0 auto;
+  padding-left: 4px;
 }
 
 .logo img {
-  width: 90px;
-  /* было 110px */
+  width: 56px;
   height: auto;
   display: block;
-  transition: transform 0.18s ease;
-  transform-origin: center;
 }
 
-.logo:hover img {
-  transform: scale(1.12);
-}
-
-.logo:active img {
-  transform: scale(1.18);
-}
-
+/* nav base */
 .nav {
   display: flex;
-  flex-wrap: nowrap;
   align-items: center;
-  gap: clamp(12px, 3vw, 40px);
+  gap: 12px;
   height: 100%;
 }
 
-.nav__link {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-  text-decoration: none;
-  color: rgba(0, 0, 0, 0.72);
-  font-weight: 700;
-  font-size: clamp(14px, 1.2vw, 18px);
-  padding: 8px 10px;
-  /* было 10px 12px */
-  border-radius: 999px;
-  transition: background 140ms ease, color 140ms ease;
-  white-space: nowrap;
+/* desktop hidden on mobile */
+.nav--desktop {
+  display: none;
 }
 
-.nav__link:hover {
-  color: #b24a4a;
-  background: rgba(178, 74, 74, 0.1);
+.nav--mobile {
+  display: flex;
 }
 
-.nav__link.router-link-active,
-.nav__link.router-link-exact-active {
-  color: #b24a4a;
-  background: rgba(178, 74, 74, 0.14);
-}
-
+/* icon buttons */
 .iconBtn {
   position: relative;
   border: 1px solid rgba(80, 55, 48, 0.14);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   border-radius: 999px;
-  padding: 8px 10px;
-  /* было 10px 12px */
   font-weight: 900;
   transition: transform 140ms ease, background 140ms ease;
   flex: 0 0 auto;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.78);
 }
 
 .iconBtn:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.iconBtn--mini {
+  padding: 9px 11px;
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .badge {
@@ -259,71 +243,130 @@ watch(
   justify-content: center;
 }
 
-.adminBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 56px;
-  height: 40px;
-  /* было 44px */
-  padding: 0 10px;
-  /* было 0 12px */
-  border-radius: 999px;
-  text-decoration: none;
-
-  background: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.72);
-  border: 1px solid rgba(80, 55, 48, 0.12);
-  transition: transform 140ms ease, background 140ms ease;
-  flex: 0 0 auto;
-}
-
-.adminBtn:hover {
-  transform: translateY(-1px);
-  background: rgba(178, 74, 74, 0.14);
-}
-
-.adminIcon {
-  line-height: 1;
-}
-
-.lock {
-  font-size: 16px;
-  line-height: 1;
+.lockMini {
+  margin-left: 6px;
+  font-size: 14px;
   opacity: 0.9;
 }
 
-.nav--mobile {
-  display: none;
-}
-
+/* burger */
 .burger {
   border: 1px solid rgba(80, 55, 48, 0.12);
   background: rgba(80, 55, 48, 0.08);
   cursor: pointer;
   border-radius: 999px;
-  padding: 8px 10px;
-  /* было 10px 12px */
+  padding: 9px 12px;
   font-weight: 900;
-  flex: 0 0 auto;
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@media (max-width: 860px) {
-  .nav--desktop {
-    display: none;
+/* =========================================
+   DESKTOP (комп) — больше, шире, крупнее
+   ========================================= */
+@media (min-width: 861px) {
+  .topbar {
+    --offset: 12px;
+    --h: 78px;
+  }
+
+  .topbar__inner {
+    /* было: width: min(1240px, calc(100% - 40px)); */
+    width: min(1240px, calc(100% - 20px));
+    /* +20px шире на компе */
+    gap: 16px;
+
+    background: rgba(235, 235, 235, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 18px 54px rgba(32, 18, 14, 0.16);
+
+    padding-left: calc(18px + env(safe-area-inset-left));
+    padding-right: calc(18px + env(safe-area-inset-right));
+  }
+
+  .logo img {
+    width: 82px;
   }
 
   .nav--mobile {
+    display: none;
+  }
+
+  .nav--desktop {
     display: flex;
+  }
+
+  .nav {
+    gap: 14px;
+  }
+
+  .nav__link {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.72);
+    font-weight: 800;
+    font-size: 16px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    transition: background 140ms ease, color 140ms ease;
+    white-space: nowrap;
+  }
+
+  .nav__link:hover {
+    color: #b24a4a;
+    background: rgba(178, 74, 74, 0.1);
+  }
+
+  .nav__link.router-link-active,
+  .nav__link.router-link-exact-active {
+    color: #b24a4a;
+    background: rgba(178, 74, 74, 0.14);
+  }
+
+  .iconBtn {
+    padding: 10px 14px;
+    font-size: 16px;
+  }
+
+  .adminBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 64px;
+    height: 46px;
+    padding: 0 14px;
+    border-radius: 999px;
+    text-decoration: none;
+
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.72);
+    border: 1px solid rgba(80, 55, 48, 0.12);
+    transition: transform 140ms ease, background 140ms ease;
+    flex: 0 0 auto;
+  }
+
+  .adminBtn:hover {
+    transform: translateY(-1px);
+    background: rgba(178, 74, 74, 0.14);
+  }
+
+  .lock {
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0.9;
   }
 }
 
-/* mobile dropdown */
+/* dropdown */
 .mobilePanel {
   position: fixed;
-  inset: calc(var(--topbar-offset) + var(--topbar-h)) 0 0 0;
-  /* было calc(12px + 110px) */
+  inset: calc(var(--offset) + env(safe-area-inset-top) + var(--h) + 10px) 0 0 0;
   background: rgba(18, 10, 8, 0.28);
   backdrop-filter: blur(8px);
   display: grid;
